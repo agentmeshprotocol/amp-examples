@@ -1,0 +1,423 @@
+---
+id: "ml-model-training"
+name: "Machine Learning Model Training Pipeline"
+version: "1.5"
+description: "End-to-end ML model training with data preparation, training, validation, and deployment"
+tags:
+  - "machine-learning"
+  - "training"
+  - "deployment"
+  - "mlops"
+
+global_timeout_seconds: 14400  # 4 hours
+global_retry_config:
+  strategy: "exponential_backoff"
+  max_attempts: 3
+  initial_delay_seconds: 5.0
+  max_delay_seconds: 300.0
+
+input_schema:
+  type: object
+  properties:
+    model_type:
+      type: string
+      enum: ["classification", "regression", "clustering"]
+    dataset_path:
+      type: string
+    model_config:
+      type: object
+      properties:
+        algorithm:
+          type: string
+        hyperparameters:
+          type: object
+        validation_split:
+          type: number
+          minimum: 0.1
+          maximum: 0.5
+    deployment_config:
+      type: object
+      properties:
+        environment:
+          type: string
+          enum: ["staging", "production"]
+        auto_deploy:
+          type: boolean
+          default: false
+        performance_threshold:
+          type: number
+          minimum: 0.5
+          maximum: 1.0
+  required: ["model_type", "dataset_path", "model_config"]
+
+output_schema:
+  type: object
+  properties:
+    model_id:
+      type: string
+    model_performance:
+      type: object
+    deployment_status:
+      type: string
+    model_artifacts:
+      type: array
+
+tasks:
+  - id: "data_preparation"
+    name: "Prepare Training Data"
+    type: "data_transform"
+    agent_id: "task-executor-1"
+    capability: "task-data-transform"
+    parameters:
+      input_data:
+        dataset_path: "{dataset_path}"
+        model_type: "{model_type}"
+      transformations:
+        - type: "custom"
+          config:
+            operation: "load_dataset"
+            path: "{dataset_path}"
+            format: "csv"
+        - type: "filter"
+          config:
+            condition: "item is not None and len(item) > 0"
+        - type: "custom"
+          config:
+            operation: "handle_missing_values"
+            strategy: "median_fill"
+        - type: "custom"
+          config:
+            operation: "feature_scaling"
+            method: "standard_scaler"
+        - type: "custom"
+          config:
+            operation: "train_test_split"
+            test_size: "{model_config.validation_split}"
+            random_state: 42
+    timeout_seconds: 1800
+    outputs: ["X_train", "X_test", "y_train", "y_test", "feature_names", "preprocessing_pipeline"]
+    depends_on: []
+
+  - id: "feature_engineering"
+    name: "Feature Engineering"
+    type: "data_transform"
+    agent_id: "task-executor-1"
+    capability: "task-data-transform"
+    parameters:
+      input_data:
+        X_train: "{X_train}"
+        X_test: "{X_test}"
+        model_type: "{model_type}"
+      transformations:
+        - type: "custom"
+          config:
+            operation: "feature_selection"
+            method: "selectkbest"
+            k: 20
+        - type: "custom"
+          config:
+            operation: "polynomial_features"
+            degree: 2
+            interaction_only: true
+        - type: "custom"
+          config:
+            operation: "feature_importance_analysis"
+    timeout_seconds: 1200
+    outputs: ["X_train_engineered", "X_test_engineered", "selected_features", "feature_importance"]
+    depends_on: ["data_preparation"]
+
+  - id: "hyperparameter_tuning"
+    name: "Hyperparameter Optimization"
+    type: "parallel"
+    agent_id: "task-executor-1"
+    capability: "task-execute"
+    parameters:
+      task_type: "custom"
+      task_config:
+        task_name: "hyperparameter_search"
+        parameters:
+          search_strategy: "grid_search"
+          cv_folds: 5
+          scoring_metric: "accuracy" # for classification
+          param_grid:
+            max_depth: [3, 5, 7, 10]
+            min_samples_split: [2, 5, 10]
+            min_samples_leaf: [1, 2, 4]
+            n_estimators: [50, 100, 200]
+          model_type: "{model_type}"
+          algorithm: "{model_config.algorithm}"
+    timeout_seconds: 3600
+    outputs: ["best_params", "best_score", "cv_results"]
+    depends_on: ["feature_engineering"]
+
+  - id: "model_training"
+    name: "Train Model with Best Parameters"
+    type: "custom"
+    agent_id: "task-executor-1"
+    capability: "task-execute"
+    parameters:
+      task_type: "custom"
+      task_config:
+        task_name: "train_model"
+        parameters:
+          algorithm: "{model_config.algorithm}"
+          hyperparameters: "{best_params}"
+          X_train: "{X_train_engineered}"
+          y_train: "{y_train}"
+          model_type: "{model_type}"
+          random_state: 42
+    timeout_seconds: 1800
+    outputs: ["trained_model", "training_metrics", "training_time"]
+    depends_on: ["hyperparameter_tuning"]
+
+  - id: "model_validation"
+    name: "Validate Model Performance"
+    type: "custom"
+    agent_id: "task-executor-1"
+    capability: "task-execute"
+    parameters:
+      task_type: "custom"
+      task_config:
+        task_name: "validate_model"
+        parameters:
+          model: "{trained_model}"
+          X_test: "{X_test_engineered}"
+          y_test: "{y_test}"
+          model_type: "{model_type}"
+          metrics: ["accuracy", "precision", "recall", "f1_score", "roc_auc"]
+    timeout_seconds: 600
+    outputs: ["validation_metrics", "predictions", "confusion_matrix", "classification_report"]
+    depends_on: ["model_training"]
+
+  - id: "performance_check"
+    name: "Check Performance Threshold"
+    type: "conditional"
+    agent_id: "condition-evaluator"
+    capability: "condition-evaluate"
+    parameters:
+      expression: "validation_metrics['accuracy'] >= deployment_config.get('performance_threshold', 0.8)"
+      context: "{workflow_context}"
+      condition_type: "python"
+    timeout_seconds: 30
+    outputs: ["meets_threshold", "performance_decision"]
+    depends_on: ["model_validation"]
+
+  - id: "model_explanation"
+    name: "Generate Model Explanations"
+    type: "custom"
+    agent_id: "task-executor-1"
+    capability: "task-execute"
+    parameters:
+      task_type: "custom"
+      task_config:
+        task_name: "model_explainability"
+        parameters:
+          model: "{trained_model}"
+          X_test_sample: "{X_test_engineered[:100]}"  # First 100 samples
+          feature_names: "{selected_features}"
+          explanation_methods: ["shap", "lime", "permutation_importance"]
+    timeout_seconds: 900
+    outputs: ["shap_values", "lime_explanations", "feature_importance_global"]
+    depends_on: ["performance_check"]
+    condition:
+      expression: "meets_threshold == True"
+      variables: {}
+      required_outputs: ["meets_threshold"]
+
+  - id: "save_model_artifacts"
+    name: "Save Model and Artifacts"
+    type: "file_operation"
+    agent_id: "task-executor-1"
+    capability: "task-file-operation"
+    parameters:
+      operation: "write"
+      file_path: "/models/{model_id}/model.pkl"
+      content: "{trained_model}"
+      additional_files:
+        - path: "/models/{model_id}/preprocessing_pipeline.pkl"
+          content: "{preprocessing_pipeline}"
+        - path: "/models/{model_id}/feature_names.json"
+          content: "{selected_features}"
+        - path: "/models/{model_id}/validation_metrics.json"
+          content: "{validation_metrics}"
+        - path: "/models/{model_id}/model_config.json"
+          content: "{model_config}"
+        - path: "/models/{model_id}/explanations.pkl"
+          content: "{shap_values}"
+    timeout_seconds: 300
+    outputs: ["model_path", "artifact_paths"]
+    depends_on: ["model_explanation"]
+
+  - id: "model_registration"
+    name: "Register Model in Registry"
+    type: "api_call"
+    agent_id: "task-executor-1"
+    capability: "task-api-call"
+    parameters:
+      method: "POST"
+      url: "https://api.mlregistry.com/models"
+      headers:
+        Content-Type: "application/json"
+        Authorization: "Bearer {ml_registry_token}"
+      data:
+        name: "{model_type}_model_{timestamp}"
+        version: "1.0"
+        algorithm: "{model_config.algorithm}"
+        performance_metrics: "{validation_metrics}"
+        artifacts:
+          model_path: "{model_path}"
+          preprocessing_path: "/models/{model_id}/preprocessing_pipeline.pkl"
+        metadata:
+          training_dataset: "{dataset_path}"
+          feature_count: "{len(selected_features)}"
+          training_time: "{training_time}"
+          hyperparameters: "{best_params}"
+        tags: ["automated", "{model_type}", "{model_config.algorithm}"]
+    timeout_seconds: 120
+    outputs: ["model_id", "registry_url"]
+    depends_on: ["save_model_artifacts"]
+
+  - id: "deploy_to_staging"
+    name: "Deploy to Staging Environment"
+    type: "api_call"
+    agent_id: "task-executor-1"
+    capability: "task-api-call"
+    parameters:
+      method: "POST"
+      url: "https://api.deployment.com/staging/deploy"
+      headers:
+        Content-Type: "application/json"
+        Authorization: "Bearer {deployment_token}"
+      data:
+        model_id: "{model_id}"
+        deployment_config:
+          replicas: 2
+          cpu_request: "500m"
+          memory_request: "1Gi"
+          auto_scaling: true
+        health_check:
+          path: "/health"
+          initial_delay: 30
+          timeout: 10
+    timeout_seconds: 600
+    outputs: ["staging_deployment_id", "staging_endpoint"]
+    depends_on: ["model_registration"]
+
+  - id: "staging_validation"
+    name: "Validate Staging Deployment"
+    type: "api_call"
+    agent_id: "task-executor-1"
+    capability: "task-api-call"
+    parameters:
+      method: "POST"
+      url: "{staging_endpoint}/predict"
+      headers:
+        Content-Type: "application/json"
+        Authorization: "Bearer {api_key}"
+      data:
+        instances: "{X_test_engineered[:10]}"  # Test with 10 samples
+      timeout: 60
+      retry_count: 3
+    timeout_seconds: 300
+    outputs: ["staging_predictions", "response_time", "staging_health"]
+    depends_on: ["deploy_to_staging"]
+
+  - id: "deploy_to_production"
+    name: "Deploy to Production"
+    type: "api_call"
+    agent_id: "task-executor-1"
+    capability: "task-api-call"
+    parameters:
+      method: "POST"
+      url: "https://api.deployment.com/production/deploy"
+      headers:
+        Content-Type: "application/json"
+        Authorization: "Bearer {deployment_token}"
+      data:
+        model_id: "{model_id}"
+        deployment_strategy: "blue_green"
+        deployment_config:
+          replicas: 5
+          cpu_request: "1000m"
+          memory_request: "2Gi"
+          auto_scaling: true
+          max_replicas: 20
+        monitoring:
+          enable_metrics: true
+          alert_thresholds:
+            error_rate: 0.05
+            latency_p95: 1000  # ms
+            cpu_utilization: 0.8
+    timeout_seconds: 900
+    outputs: ["production_deployment_id", "production_endpoint"]
+    depends_on: ["staging_validation"]
+    condition:
+      expression: "deployment_config.get('auto_deploy', False) == True and staging_health == 'healthy'"
+      variables: {}
+      required_outputs: ["staging_health"]
+
+  - id: "monitoring_setup"
+    name: "Setup Model Monitoring"
+    type: "api_call"
+    agent_id: "task-executor-1"
+    capability: "task-api-call"
+    parameters:
+      method: "POST"
+      url: "https://api.monitoring.com/models/{model_id}/monitors"
+      headers:
+        Content-Type: "application/json"
+        Authorization: "Bearer {monitoring_token}"
+      data:
+        monitors:
+          - type: "data_drift"
+            baseline_data: "{X_train_engineered}"
+            alert_threshold: 0.1
+          - type: "prediction_drift"
+            baseline_predictions: "{predictions}"
+            alert_threshold: 0.15
+          - type: "performance_degradation"
+            baseline_metrics: "{validation_metrics}"
+            alert_threshold: 0.05
+        notification_channels: ["email", "slack"]
+        check_frequency: "hourly"
+    timeout_seconds: 120
+    outputs: ["monitor_ids", "monitoring_dashboard"]
+    depends_on: ["deploy_to_production", "staging_validation"]
+
+  - id: "training_summary"
+    name: "Generate Training Summary Report"
+    type: "data_transform"
+    agent_id: "task-executor-1"
+    capability: "task-data-transform"
+    parameters:
+      input_data:
+        model_id: "{model_id}"
+        training_metrics: "{training_metrics}"
+        validation_metrics: "{validation_metrics}"
+        best_params: "{best_params}"
+        feature_count: "{len(selected_features)}"
+        training_time: "{training_time}"
+        deployment_status: "{production_deployment_id or staging_deployment_id}"
+      transformations:
+        - type: "map"
+          config:
+            expression: "{'summary': f'Model {item[\"model_id\"]} trained successfully', 'performance': item['validation_metrics'], 'deployment': 'production' if item.get('deployment_status') else 'staging', 'recommendations': ['Monitor for data drift', 'Schedule retraining in 30 days']}"
+    timeout_seconds: 60
+    outputs: ["training_report", "next_steps"]
+    depends_on: ["monitoring_setup"]
+
+metadata:
+  created_by: "ml-engineering-team"
+  created_at: "2024-01-15T08:00:00Z"
+  last_modified: "2024-01-25T16:45:00Z"
+  version_notes: "Added model explainability and enhanced monitoring"
+  environment: "production"
+  estimated_duration_minutes: 120
+  resource_requirements:
+    cpu_cores: 8
+    memory_gb: 16
+    gpu_required: false
+  compliance:
+    data_governance: true
+    model_approval_required: true
+    audit_trail: true

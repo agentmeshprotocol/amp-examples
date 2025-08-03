@@ -1,0 +1,380 @@
+{% extends "base.html" %}
+
+{% block title %}Search - Knowledge Base System{% endblock %}
+
+{% block extra_head %}
+<style>
+.search-result {
+    transition: all 0.2s ease;
+}
+.search-result:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.result-score {
+    font-size: 0.8rem;
+}
+.search-stats {
+    font-size: 0.9rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-search text-primary me-2"></i>
+                    Knowledge Search
+                </h4>
+            </div>
+            <div class="card-body">
+                <!-- Search Form -->
+                <form id="search-form" class="mb-4">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <input type="text" class="form-control form-control-lg" 
+                                       id="search-query" 
+                                       placeholder="Enter your search query..."
+                                       value="{{ request.query_params.get('q', '') }}">
+                                <button class="btn btn-primary btn-lg" type="submit">
+                                    <i class="fas fa-search me-2"></i>Search
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <select class="form-select" id="search-type">
+                                        <option value="hybrid">Hybrid Search</option>
+                                        <option value="semantic">Semantic Only</option>
+                                        <option value="keyword">Keyword Only</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <select class="form-select" id="result-count">
+                                        <option value="10">10 Results</option>
+                                        <option value="20">20 Results</option>
+                                        <option value="50">50 Results</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Advanced Filters (Collapsible) -->
+                    <div class="mt-3">
+                        <button class="btn btn-outline-secondary btn-sm" type="button" 
+                                data-bs-toggle="collapse" data-bs-target="#advanced-filters">
+                            <i class="fas fa-filter me-1"></i>Advanced Filters
+                        </button>
+                        
+                        <div class="collapse mt-3" id="advanced-filters">
+                            <div class="card card-body bg-light">
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label small">Content Type</label>
+                                        <select class="form-select form-select-sm" id="filter-type">
+                                            <option value="">All Types</option>
+                                            <option value="pdf">PDF Documents</option>
+                                            <option value="text">Text Files</option>
+                                            <option value="html">Web Pages</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small">Date Range</label>
+                                        <select class="form-select form-select-sm" id="filter-date">
+                                            <option value="">Any Time</option>
+                                            <option value="1d">Last Day</option>
+                                            <option value="1w">Last Week</option>
+                                            <option value="1m">Last Month</option>
+                                            <option value="1y">Last Year</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small">Quality Score</label>
+                                        <select class="form-select form-select-sm" id="filter-quality">
+                                            <option value="">Any Quality</option>
+                                            <option value="0.8">Excellent (80%+)</option>
+                                            <option value="0.6">Good (60%+)</option>
+                                            <option value="0.4">Fair (40%+)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small">Tags</label>
+                                        <input type="text" class="form-control form-control-sm" 
+                                               id="filter-tags" placeholder="Enter tags...">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Search Statistics -->
+                <div id="search-stats" class="mb-3" style="display: none;">
+                    <div class="alert alert-info search-stats">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Found <strong id="result-count-display">0</strong> results 
+                                in <strong id="search-time-display">0</strong> seconds
+                            </div>
+                            <div class="col-md-4 text-md-end">
+                                <small>
+                                    Routed to: <span id="source-agents-display">--</span>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search Results -->
+                <div id="search-results">
+                    <div class="text-center text-muted py-5">
+                        <i class="fas fa-search fa-3x mb-3"></i>
+                        <h5>Enter a search query to get started</h5>
+                        <p>Use natural language to search through the knowledge base</p>
+                        
+                        <!-- Example Queries -->
+                        <div class="mt-4">
+                            <h6>Try these example queries:</h6>
+                            <div class="d-flex flex-wrap justify-content-center gap-2 mt-2">
+                                <button class="btn btn-outline-primary btn-sm example-query" 
+                                        data-query="machine learning algorithms">
+                                    machine learning algorithms
+                                </button>
+                                <button class="btn btn-outline-primary btn-sm example-query" 
+                                        data-query="artificial intelligence applications">
+                                    artificial intelligence applications
+                                </button>
+                                <button class="btn btn-outline-primary btn-sm example-query" 
+                                        data-query="data processing techniques">
+                                    data processing techniques
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading Indicator -->
+                <div id="search-loading" class="text-center py-5" style="display: none;">
+                    <div class="spinner-border text-primary mb-3" role="status"></div>
+                    <h5>Searching...</h5>
+                    <p class="text-muted">Routing query through specialized agents</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Search form submission
+    document.getElementById('search-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        performSearch();
+    });
+    
+    // Example query buttons
+    document.querySelectorAll('.example-query').forEach(button => {
+        button.addEventListener('click', function() {
+            const query = this.getAttribute('data-query');
+            document.getElementById('search-query').value = query;
+            performSearch();
+        });
+    });
+    
+    // Auto-search if query parameter exists
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryParam = urlParams.get('q');
+    if (queryParam) {
+        document.getElementById('search-query').value = queryParam;
+        performSearch();
+    }
+});
+
+function performSearch() {
+    const query = document.getElementById('search-query').value.trim();
+    if (!query) return;
+    
+    const searchType = document.getElementById('search-type').value;
+    const resultCount = parseInt(document.getElementById('result-count').value);
+    
+    // Get filters
+    const filters = {
+        content_type: document.getElementById('filter-type').value,
+        date_range: document.getElementById('filter-date').value,
+        min_quality: document.getElementById('filter-quality').value,
+        tags: document.getElementById('filter-tags').value
+    };
+    
+    // Remove empty filters
+    Object.keys(filters).forEach(key => {
+        if (!filters[key]) delete filters[key];
+    });
+    
+    showLoading(true);
+    hideResults();
+    
+    fetch('/api/search', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            query: query,
+            search_type: searchType,
+            filters: filters
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        showLoading(false);
+        
+        if (data.success) {
+            displayResults(data.results, data.routing_info, data.performance_stats);
+        } else {
+            displayError('Search failed: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        showLoading(false);
+        console.error('Search error:', error);
+        displayError('Search request failed. Please try again.');
+    });
+}
+
+function showLoading(show) {
+    document.getElementById('search-loading').style.display = show ? 'block' : 'none';
+}
+
+function hideResults() {
+    document.getElementById('search-results').innerHTML = '';
+    document.getElementById('search-stats').style.display = 'none';
+}
+
+function displayResults(results, routingInfo, performanceStats) {
+    const resultsContainer = document.getElementById('search-results');
+    const statsContainer = document.getElementById('search-stats');
+    
+    // Update statistics
+    document.getElementById('result-count-display').textContent = results.length;
+    document.getElementById('search-time-display').textContent = 
+        (performanceStats.total_time_seconds || 0).toFixed(2);
+    document.getElementById('source-agents-display').textContent = 
+        routingInfo.source_agents?.join(', ') || 'Unknown';
+    
+    statsContainer.style.display = 'block';
+    
+    if (results.length === 0) {
+        resultsContainer.innerHTML = `
+            <div class="text-center text-muted py-5">
+                <i class="fas fa-search-minus fa-3x mb-3"></i>
+                <h5>No results found</h5>
+                <p>Try different keywords or remove some filters</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Display results
+    const resultsHtml = results.map((result, index) => {
+        const score = result.score || result.similarity || 0;
+        const title = result.metadata?.title || `Document ${index + 1}`;
+        const text = result.text || '';
+        const preview = text.length > 200 ? text.substring(0, 200) + '...' : text;
+        const source = result.metadata?.source || result.source_agent || 'Unknown';
+        const contentType = result.metadata?.mime_type || 'text/plain';
+        
+        // Get content type icon
+        const typeIcon = getContentTypeIcon(contentType);
+        
+        return `
+            <div class="card search-result mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="card-title mb-0">
+                            <i class="${typeIcon} me-2"></i>
+                            ${escapeHtml(title)}
+                        </h6>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-primary result-score me-2">
+                                ${(score * 100).toFixed(1)}%
+                            </span>
+                            ${result.source_agent ? 
+                                `<span class="badge bg-secondary result-score">${result.source_agent}</span>` : 
+                                ''}
+                        </div>
+                    </div>
+                    
+                    <p class="card-text text-muted mb-2">${escapeHtml(preview)}</p>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="small text-muted">
+                            <i class="fas fa-file me-1"></i>Source: ${escapeHtml(source)}
+                            ${result.metadata?.word_count ? 
+                                `<span class="ms-3"><i class="fas fa-align-left me-1"></i>${result.metadata.word_count} words</span>` : 
+                                ''}
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-outline-primary" 
+                                    onclick="showFullContent('${result.id || index}')">
+                                <i class="fas fa-eye me-1"></i>View Full
+                            </button>
+                            ${result.metadata?.entities?.length > 0 ? 
+                                `<button class="btn btn-sm btn-outline-secondary ms-1" 
+                                         onclick="showEntities('${result.id || index}')">
+                                    <i class="fas fa-tags me-1"></i>Entities
+                                </button>` : 
+                                ''}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    resultsContainer.innerHTML = resultsHtml;
+}
+
+function displayError(message) {
+    const resultsContainer = document.getElementById('search-results');
+    resultsContainer.innerHTML = `
+        <div class="alert alert-danger text-center">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            ${message}
+        </div>
+    `;
+}
+
+function getContentTypeIcon(mimeType) {
+    if (mimeType.includes('pdf')) return 'fas fa-file-pdf text-danger';
+    if (mimeType.includes('word')) return 'fas fa-file-word text-primary';
+    if (mimeType.includes('html')) return 'fas fa-file-code text-warning';
+    if (mimeType.includes('image')) return 'fas fa-file-image text-success';
+    return 'fas fa-file-alt text-secondary';
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function showFullContent(resultId) {
+    // In a real implementation, this would show a modal with full content
+    alert('Full content view would be implemented here');
+}
+
+function showEntities(resultId) {
+    // In a real implementation, this would show entities in a modal
+    alert('Entity view would be implemented here');
+}
+</script>
+{% endblock %}

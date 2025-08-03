@@ -1,0 +1,388 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Knowledge Base System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Hero Section -->
+        <div class="jumbotron bg-gradient text-white rounded-3 p-5 mb-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="container">
+                <h1 class="display-4 fw-bold">
+                    <i class="fas fa-brain me-3"></i>
+                    Knowledge Base System
+                </h1>
+                <p class="lead mb-4">
+                    Advanced RAG and knowledge management powered by distributed AI agents
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="/search" class="btn btn-light btn-lg">
+                        <i class="fas fa-search me-2"></i>Search Knowledge
+                    </a>
+                    <a href="/upload" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-upload me-2"></i>Add Content
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <!-- Quick Search -->
+    <div class="col-lg-8">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-search text-primary me-2"></i>
+                    Quick Search
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="quick-search-form">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control form-control-lg" 
+                               id="quick-search-input" 
+                               placeholder="Search the knowledge base...">
+                        <select class="form-select" id="search-type" style="max-width: 150px;">
+                            <option value="hybrid">Hybrid</option>
+                            <option value="semantic">Semantic</option>
+                            <option value="keyword">Keyword</option>
+                        </select>
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+                
+                <div id="quick-results" class="mt-3" style="display: none;">
+                    <h6>Quick Results:</h6>
+                    <div id="quick-results-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- System Overview -->
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-tachometer-alt text-success me-2"></i>
+                    System Overview
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="text-center">
+                            <div class="h4 text-primary mb-1" id="total-documents">--</div>
+                            <small class="text-muted">Documents</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center">
+                            <div class="h4 text-success mb-1" id="cache-hit-rate-home">--</div>
+                            <small class="text-muted">Cache Hit Rate</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center">
+                            <div class="h4 text-info mb-1" id="avg-quality">--</div>
+                            <small class="text-muted">Avg Quality</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center">
+                            <div class="h4 text-warning mb-1" id="active-agents-home">--</div>
+                            <small class="text-muted">Active Agents</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <!-- Feature Cards -->
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card text-center h-100 feature-card">
+            <div class="card-body">
+                <div class="feature-icon text-primary mb-3">
+                    <i class="fas fa-search fa-3x"></i>
+                </div>
+                <h5 class="card-title">Semantic Search</h5>
+                <p class="card-text">Advanced vector search with AI-powered similarity matching</p>
+                <a href="/search" class="btn btn-outline-primary">Try Search</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card text-center h-100 feature-card">
+            <div class="card-body">
+                <div class="feature-icon text-success mb-3">
+                    <i class="fas fa-project-diagram fa-3x"></i>
+                </div>
+                <h5 class="card-title">Knowledge Graph</h5>
+                <p class="card-text">Discover relationships and connections between entities</p>
+                <a href="/graph" class="btn btn-outline-success">Explore Graph</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card text-center h-100 feature-card">
+            <div class="card-body">
+                <div class="feature-icon text-info mb-3">
+                    <i class="fas fa-upload fa-3x"></i>
+                </div>
+                <h5 class="card-title">Document Ingestion</h5>
+                <p class="card-text">Upload and process documents with automatic indexing</p>
+                <a href="/upload" class="btn btn-outline-info">Upload Documents</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card text-center h-100 feature-card">
+            <div class="card-body">
+                <div class="feature-icon text-warning mb-3">
+                    <i class="fas fa-chart-bar fa-3x"></i>
+                </div>
+                <h5 class="card-title">Analytics</h5>
+                <p class="card-text">Insights and quality metrics for your knowledge base</p>
+                <a href="/analytics" class="btn btn-outline-warning">View Analytics</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent Activity -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-clock text-primary me-2"></i>
+                    Recent Activity
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="recent-activity">
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Agent Status -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-robot text-success me-2"></i>
+                    Agent Status
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="agent-status">
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border text-success" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load system overview
+    loadSystemOverview();
+    
+    // Load recent activity
+    loadRecentActivity();
+    
+    // Load agent status
+    loadAgentStatus();
+    
+    // Quick search form
+    document.getElementById('quick-search-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        performQuickSearch();
+    });
+    
+    // Auto-refresh every 30 seconds
+    setInterval(function() {
+        loadSystemOverview();
+        loadAgentStatus();
+    }, 30000);
+});
+
+function loadSystemOverview() {
+    fetch('/api/analytics')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const analytics = data.analytics;
+                document.getElementById('total-documents').textContent = 
+                    analytics.overview?.total_items || '--';
+                document.getElementById('avg-quality').textContent = 
+                    (analytics.quality_analysis?.average * 100).toFixed(1) + '%' || '--';
+            }
+        })
+        .catch(error => console.error('Error loading overview:', error));
+    
+    // Load cache stats
+    fetch('/api/cache/stats')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('cache-hit-rate-home').textContent = 
+                    data.stats.hit_rate_percent?.toFixed(1) + '%' || '--';
+            }
+        })
+        .catch(error => console.error('Error loading cache stats:', error));
+}
+
+function loadRecentActivity() {
+    // Simulate recent activity (in real system, this would come from logs/database)
+    const activities = [
+        { type: 'upload', text: 'Document "AI Research Paper.pdf" uploaded', time: '5 minutes ago' },
+        { type: 'search', text: 'Search query: "machine learning algorithms"', time: '12 minutes ago' },
+        { type: 'quality', text: 'Quality analysis completed for 15 documents', time: '1 hour ago' },
+        { type: 'cache', text: 'Cache optimization completed', time: '2 hours ago' }
+    ];
+    
+    const icons = {
+        upload: 'fas fa-upload text-success',
+        search: 'fas fa-search text-primary',
+        quality: 'fas fa-check-circle text-info',
+        cache: 'fas fa-rocket text-warning'
+    };
+    
+    const html = activities.map(activity => `
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-3">
+                <i class="${icons[activity.type]}"></i>
+            </div>
+            <div class="flex-grow-1">
+                <div class="small">${activity.text}</div>
+                <div class="text-muted" style="font-size: 0.8rem;">${activity.time}</div>
+            </div>
+        </div>
+    `).join('');
+    
+    document.getElementById('recent-activity').innerHTML = html;
+}
+
+function loadAgentStatus() {
+    fetch('/api/system/status')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const agents = data.agents;
+                const activeCount = Object.values(agents).filter(status => status === 'online').length;
+                
+                document.getElementById('active-agents-home').textContent = 
+                    `${activeCount}/${Object.keys(agents).length}`;
+                
+                // Update agent status display
+                const agentNames = {
+                    'query-router-agent': 'Query Router',
+                    'knowledge-ingestion-agent': 'Ingestion',
+                    'semantic-search-agent': 'Search',
+                    'knowledge-graph-agent': 'Graph',
+                    'cache-manager-agent': 'Cache',
+                    'knowledge-curator-agent': 'Curator'
+                };
+                
+                const html = Object.entries(agents).map(([agentId, status]) => {
+                    const name = agentNames[agentId] || agentId;
+                    const badgeClass = status === 'online' ? 'bg-success' : 'bg-danger';
+                    return `
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small">${name}</span>
+                            <span class="badge ${badgeClass}">${status}</span>
+                        </div>
+                    `;
+                }).join('');
+                
+                document.getElementById('agent-status').innerHTML = html;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading agent status:', error);
+            document.getElementById('agent-status').innerHTML = 
+                '<div class="text-danger">Error loading status</div>';
+        });
+}
+
+function performQuickSearch() {
+    const query = document.getElementById('quick-search-input').value;
+    const searchType = document.getElementById('search-type').value;
+    
+    if (!query.trim()) return;
+    
+    const resultsDiv = document.getElementById('quick-results');
+    const contentDiv = document.getElementById('quick-results-content');
+    
+    resultsDiv.style.display = 'block';
+    contentDiv.innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div> Searching...';
+    
+    fetch('/api/search', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            query: query,
+            search_type: searchType
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const results = data.results.slice(0, 3); // Show top 3 results
+            
+            if (results.length > 0) {
+                const html = results.map(result => `
+                    <div class="border-start border-primary ps-3 mb-2">
+                        <div class="small fw-bold">${result.metadata?.title || 'Untitled'}</div>
+                        <div class="small text-muted">${result.text?.substring(0, 100)}...</div>
+                        <div class="small">
+                            <span class="badge bg-secondary">Score: ${(result.score || result.similarity || 0).toFixed(2)}</span>
+                        </div>
+                    </div>
+                `).join('');
+                
+                contentDiv.innerHTML = html + 
+                    `<div class="text-center mt-2">
+                        <a href="/search?q=${encodeURIComponent(query)}" class="btn btn-sm btn-outline-primary">
+                            View All Results
+                        </a>
+                    </div>`;
+            } else {
+                contentDiv.innerHTML = '<div class="text-muted">No results found</div>';
+            }
+        } else {
+            contentDiv.innerHTML = '<div class="text-danger">Search error occurred</div>';
+        }
+    })
+    .catch(error => {
+        console.error('Search error:', error);
+        contentDiv.innerHTML = '<div class="text-danger">Search failed</div>';
+    });
+}
+</script>
+{% endblock %}

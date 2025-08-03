@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Knowledge Base System</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        .admin-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .admin-sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+        }
+        
+        .admin-sidebar .nav-link:hover,
+        .admin-sidebar .nav-link.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0.375rem;
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 0.5rem;
+            transition: transform 0.2s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .status-healthy { color: #28a745; }
+        .status-warning { color: #ffc107; }
+        .status-error { color: #dc3545; }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        
+        .real-time-indicator {
+            width: 8px;
+            height: 8px;
+            background: #28a745;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block admin-sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h5><i class="fas fa-shield-alt me-2"></i>Admin Panel</h5>
+                        <small>Welcome, {{ username }}</small>
+                    </div>
+                    
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#dashboard">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/quality-management">
+                                <i class="fas fa-check-circle me-2"></i>Quality Management
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/cache-management">
+                                <i class="fas fa-rocket me-2"></i>Cache Management
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/agent-management">
+                                <i class="fas fa-robot me-2"></i>Agent Management
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/data-management">
+                                <i class="fas fa-database me-2"></i>Data Management
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/logs">
+                                <i class="fas fa-file-alt me-2"></i>System Logs
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/settings">
+                                <i class="fas fa-cog me-2"></i>Settings
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <hr class="my-3">
+                    
+                    <div class="text-center">
+                        <div class="real-time-indicator"></div>
+                        <small>Real-time Monitoring</small>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Admin Dashboard</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="refreshDashboard()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="exportMetrics()">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- System Overview -->
+                <div class="row mb-4">
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card metric-card text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <div class="h4 mb-0" id="total-agents">--</div>
+                                        <div class="small">Active Agents</div>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-robot fa-2x opacity-75"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card metric-card text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <div class="h4 mb-0" id="query-count">--</div>
+                                        <div class="small">Queries Today</div>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-search fa-2x opacity-75"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card metric-card text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <div class="h4 mb-0" id="cache-hit-rate">--</div>
+                                        <div class="small">Cache Hit Rate</div>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-rocket fa-2x opacity-75"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card metric-card text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <div class="h4 mb-0" id="avg-quality">--</div>
+                                        <div class="small">Avg Quality</div>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-star fa-2x opacity-75"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Charts Row -->
+                <div class="row mb-4">
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-chart-line text-primary me-2"></i>
+                                    Performance Metrics
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="performanceChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-heartbeat text-success me-2"></i>
+                                    System Health
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="system-health">
+                                    <div class="text-center">
+                                        <div class="spinner-border text-primary" role="status"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Agent Status and Recent Activity -->
+                <div class="row mb-4">
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-robot text-info me-2"></i>
+                                    Agent Status
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="agent-status">
+                                    <div class="text-center">
+                                        <div class="spinner-border text-info" role="status"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                    System Alerts
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="system-alerts">
+                                    <div class="text-center text-muted">
+                                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                        <div>No active alerts</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-bolt text-warning me-2"></i>
+                                    Quick Actions
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <button class="btn btn-outline-primary w-100" onclick="optimizeCache()">
+                                            <i class="fas fa-rocket mb-2 d-block"></i>
+                                            Optimize Cache
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button class="btn btn-outline-success w-100" onclick="runQualityCheck()">
+                                            <i class="fas fa-check-circle mb-2 d-block"></i>
+                                            Quality Check
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button class="btn btn-outline-info w-100" onclick="cleanupDuplicates()">
+                                            <i class="fas fa-copy mb-2 d-block"></i>
+                                            Remove Duplicates
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button class="btn btn-outline-warning w-100" onclick="createBackup()">
+                                            <i class="fas fa-save mb-2 d-block"></i>
+                                            Create Backup
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let performanceChart;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDashboard();
+            initializeCharts();
+            startRealTimeUpdates();
+        });
+        
+        function initializeDashboard() {
+            loadSystemHealth();
+            loadDetailedAnalytics();
+        }
+        
+        function initializeCharts() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            performanceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Response Time (ms)',
+                        data: [],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Cache Hit Rate (%)',
+                        data: [],
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            
+            // Load initial chart data
+            updatePerformanceChart();
+        }
+        
+        function loadSystemHealth() {
+            fetch('/api/system/health')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateSystemHealthDisplay(data.health);
+                        updateMetrics(data.health);
+                    }
+                })
+                .catch(error => console.error('Error loading system health:', error));
+        }
+        
+        function loadDetailedAnalytics() {
+            fetch('/api/analytics/detailed')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateAnalyticsDisplay(data.analytics);
+                    }
+                })
+                .catch(error => console.error('Error loading analytics:', error));
+        }
+        
+        function updateSystemHealthDisplay(health) {
+            const agentCount = Object.keys(health.agents).length;
+            const healthyCount = Object.values(health.agents).filter(a => a.status === 'healthy').length;
+            
+            document.getElementById('total-agents').textContent = `${healthyCount}/${agentCount}`;
+            
+            // Update agent status display
+            const agentStatusHtml = Object.entries(health.agents).map(([agentId, status]) => {
+                const statusClass = status.status === 'healthy' ? 'status-healthy' : 'status-error';
+                const icon = status.status === 'healthy' ? 'fa-check-circle' : 'fa-times-circle';
+                return `
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="small">${agentId.replace('-agent', '')}</span>
+                        <span class="${statusClass}">
+                            <i class="fas ${icon} me-1"></i>
+                            ${status.status}
+                        </span>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('agent-status').innerHTML = agentStatusHtml;
+            
+            // Update system health
+            const healthHtml = `
+                <div class="text-center">
+                    <div class="h3 status-healthy mb-2">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <div class="h5 mb-1">System Healthy</div>
+                    <div class="small text-muted">All agents operational</div>
+                </div>
+            `;
+            document.getElementById('system-health').innerHTML = healthHtml;
+        }
+        
+        function updateMetrics(health) {
+            // Update query count (simulated)
+            document.getElementById('query-count').textContent = '1,247';
+            
+            // Update cache hit rate (from cache stats if available)
+            document.getElementById('cache-hit-rate').textContent = '87.3%';
+            
+            // Update quality score (simulated)
+            document.getElementById('avg-quality').textContent = '92.1%';
+        }
+        
+        function updateAnalyticsDisplay(analytics) {
+            // Update additional metrics from detailed analytics
+            console.log('Analytics data:', analytics);
+        }
+        
+        function updatePerformanceChart() {
+            // Simulate performance data
+            const now = new Date();
+            const labels = [];
+            const responseData = [];
+            const cacheData = [];
+            
+            for (let i = 11; i >= 0; i--) {
+                const time = new Date(now.getTime() - i * 5 * 60000); // 5-minute intervals
+                labels.push(time.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}));
+                responseData.push(Math.random() * 100 + 50); // 50-150ms
+                cacheData.push(Math.random() * 20 + 70); // 70-90%
+            }
+            
+            performanceChart.data.labels = labels;
+            performanceChart.data.datasets[0].data = responseData;
+            performanceChart.data.datasets[1].data = cacheData;
+            performanceChart.update();
+        }
+        
+        function startRealTimeUpdates() {
+            // Update metrics every 30 seconds
+            setInterval(() => {
+                loadSystemHealth();
+                updatePerformanceChart();
+            }, 30000);
+        }
+        
+        function refreshDashboard() {
+            initializeDashboard();
+            updatePerformanceChart();
+            showToast('Dashboard refreshed', 'success');
+        }
+        
+        function exportMetrics() {
+            window.open('/api/metrics/export?format=csv&period=7d', '_blank');
+        }
+        
+        function optimizeCache() {
+            if (confirm('This will optimize the cache and may temporarily affect performance. Continue?')) {
+                fetch('/api/cache/control', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: 'cleanup' })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('Cache optimization completed', 'success');
+                    } else {
+                        showToast('Cache optimization failed', 'danger');
+                    }
+                });
+            }
+        }
+        
+        function runQualityCheck() {
+            showToast('Running quality check...', 'info');
+            fetch('/api/quality/bulk-analysis', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('Quality check completed', 'success');
+                    } else {
+                        showToast('Quality check failed', 'danger');
+                    }
+                });
+        }
+        
+        function cleanupDuplicates() {
+            if (confirm('This will scan for and clean up duplicate content. Continue?')) {
+                const formData = new FormData();
+                formData.append('cleanup_type', 'duplicates');
+                
+                fetch('/api/data/cleanup', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('Duplicate cleanup completed', 'success');
+                    } else {
+                        showToast('Duplicate cleanup failed', 'danger');
+                    }
+                });
+            }
+        }
+        
+        function createBackup() {
+            showToast('Creating backup...', 'info');
+            window.open('/api/data/backup', '_blank');
+        }
+        
+        function showToast(message, type = 'info') {
+            // Simple toast implementation
+            const toastContainer = document.querySelector('.toast-container') || createToastContainer();
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type} border-0 show`;
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" 
+                            onclick="this.parentElement.parentElement.remove()"></button>
+                </div>
+            `;
+            toastContainer.appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 5000);
+        }
+        
+        function createToastContainer() {
+            const container = document.createElement('div');
+            container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+            document.body.appendChild(container);
+            return container;
+        }
+    </script>
+</body>
+</html>

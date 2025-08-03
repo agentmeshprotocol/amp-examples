@@ -1,0 +1,102 @@
+---
+id: "hello-world-workflow"
+name: "Hello World Workflow"
+version: "1.0"
+description: "Simple example workflow demonstrating basic AMP workflow concepts"
+tags:
+  - "example"
+  - "tutorial"
+  - "simple"
+
+global_timeout_seconds: 300
+global_retry_config:
+  strategy: "fixed_delay"
+  max_attempts: 2
+  initial_delay_seconds: 1.0
+
+input_schema:
+  type: object
+  properties:
+    name:
+      type: string
+      default: "World"
+    language:
+      type: string
+      enum: ["en", "es", "fr"]
+      default: "en"
+  required: []
+
+output_schema:
+  type: object
+  properties:
+    greeting:
+      type: string
+    processed_at:
+      type: string
+    steps_completed:
+      type: integer
+
+tasks:
+  - id: "generate_greeting"
+    name: "Generate Greeting Message"
+    type: "data_transform"
+    agent_id: "task-executor-1"
+    capability: "task-data-transform"
+    parameters:
+      input_data:
+        name: "{name}"
+        language: "{language}"
+      transformations:
+        - type: "map"
+          config:
+            expression: "{'greeting': f'Hello, {item[\"name\"]}!' if item['language'] == 'en' else f'Hola, {item[\"name\"]}!' if item['language'] == 'es' else f'Bonjour, {item[\"name\"]}!'}"
+    timeout_seconds: 30
+    outputs: ["greeting_message"]
+    depends_on: []
+
+  - id: "validate_greeting"
+    name: "Validate Greeting"
+    type: "validation"
+    agent_id: "task-executor-1"
+    capability: "task-validation"
+    parameters:
+      data: "{greeting_message}"
+      rules:
+        - type: "required"
+          field: "greeting"
+          message: "Greeting is required"
+        - type: "type"
+          field: "greeting"
+          config:
+            type: "str"
+          message: "Greeting must be a string"
+    timeout_seconds: 30
+    outputs: ["validation_result"]
+    depends_on: ["generate_greeting"]
+
+  - id: "add_timestamp"
+    name: "Add Processing Timestamp"
+    type: "data_transform"
+    agent_id: "task-executor-1"
+    capability: "task-data-transform"
+    parameters:
+      input_data:
+        greeting: "{greeting_message.greeting}"
+      transformations:
+        - type: "map"
+          config:
+            expression: "{'greeting': item['greeting'], 'processed_at': datetime.now().isoformat(), 'steps_completed': 3}"
+    timeout_seconds: 30
+    outputs: ["final_result"]
+    depends_on: ["validate_greeting"]
+    condition:
+      expression: "validation_result.valid == True"
+      variables: {}
+      required_outputs: ["validation_result"]
+
+metadata:
+  created_by: "tutorial"
+  created_at: "2024-01-15T12:00:00Z"
+  last_modified: "2024-01-15T12:00:00Z"
+  version_notes: "Initial hello world example"
+  environment: "development"

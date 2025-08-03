@@ -1,0 +1,252 @@
+# Knowledge Base System Agent Configuration
+
+# Global AMP Configuration
+amp:
+  protocol_version: "AMP/1.0"
+  default_timeout: 30000  # 30 seconds
+  retry_attempts: 3
+  heartbeat_interval: 60  # seconds
+
+# Network Configuration
+network:
+  host: "localhost"
+  port: 8000
+  websocket_path: "/ws"
+  max_connections: 100
+  connection_timeout: 10  # seconds
+
+# Agent Definitions
+agents:
+  knowledge-ingestion-agent:
+    enabled: true
+    auto_start: true
+    capabilities:
+      - "document-ingestion"
+      - "batch-ingestion" 
+      - "text-processing"
+    config:
+      chunk_size: 1000
+      chunk_overlap: 200
+      supported_formats:
+        - "application/pdf"
+        - "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        - "text/html"
+        - "text/plain"
+        - "text/markdown"
+      embedding_model: "all-MiniLM-L6-v2"
+      processing_batch_size: 10
+      max_file_size: 104857600  # 100MB
+      temp_directory: "./temp"
+    
+  semantic-search-agent:
+    enabled: true
+    auto_start: true
+    capabilities:
+      - "semantic-search"
+      - "hybrid-search"
+      - "index-chunks"
+      - "similarity-search"
+    config:
+      vector_index:
+        type: "HNSW"  # or "IVF", "Flat"
+        dimension: 384
+        ef_search: 64
+        m: 32
+      similarity_threshold: 0.0
+      max_results: 100
+      index_path: "./data/vector_index"
+      chroma_db_path: "./data/chroma_db"
+      embedding_model: "all-MiniLM-L6-v2"
+      
+  knowledge-graph-agent:
+    enabled: true
+    auto_start: true
+    capabilities:
+      - "extract-entities"
+      - "graph-search"
+      - "find-related"
+      - "find-path"
+      - "graph-analytics"
+    config:
+      nlp_model: "en_core_web_sm"
+      graph_database:
+        type: "networkx"  # or "neo4j", "rdf"
+        connection:
+          uri: "bolt://localhost:7687"
+          username: "neo4j"
+          password: "password"
+      graph_path: "./data/knowledge_graph"
+      max_depth: 5
+      entity_confidence_threshold: 0.8
+      
+  query-router-agent:
+    enabled: true
+    auto_start: true
+    capabilities:
+      - "route-query"
+      - "analyze-query"
+      - "get-routing-stats"
+    config:
+      routing_strategy: "intelligent"  # or "round_robin", "weighted"
+      similarity_threshold: 0.85
+      confidence_threshold: 0.7
+      parallel_execution: true
+      max_parallel_agents: 3
+      fallback_enabled: true
+      performance_tracking: true
+      
+  cache-manager-agent:
+    enabled: true
+    auto_start: true
+    capabilities:
+      - "cache-lookup"
+      - "cache-store"
+      - "cache-invalidate"
+      - "cache-stats"
+      - "optimize-cache"
+    config:
+      cache_backend: "redis"  # or "memory"
+      redis:
+        url: "redis://localhost:6379"
+        db: 0
+        max_connections: 20
+      strategies:
+        query_results:
+          ttl: 3600
+          max_size: 10000
+          eviction_policy: "lru"
+        embeddings:
+          ttl: 86400
+          max_size: 50000
+          eviction_policy: "lfu"
+        graph_results:
+          ttl: 7200
+          max_size: 5000
+          eviction_policy: "lru"
+      similarity_matching:
+        enabled: true
+        threshold: 0.85
+        model: "all-MiniLM-L6-v2"
+        
+  knowledge-curator-agent:
+    enabled: true
+    auto_start: true
+    capabilities:
+      - "quality-analysis"
+      - "duplicate-detection"
+      - "knowledge-analytics"
+      - "content-validation"
+      - "improvement-suggestions"
+    config:
+      quality_analysis:
+        nlp_model: "en_core_web_sm"
+        embedding_model: "all-MiniLM-L6-v2"
+        weights:
+          readability: 0.2
+          coherence: 0.25
+          completeness: 0.2
+          accuracy_indicators: 0.15
+          relevance: 0.1
+          freshness: 0.1
+      duplicate_detection:
+        similarity_threshold: 0.85
+        algorithm: "semantic"  # or "tfidf", "hybrid"
+      validation_standards:
+        min_quality_score: 0.5
+        min_word_count: 50
+        required_metadata: ["title", "source"]
+
+# Logging Configuration
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "./logs/agents.log"
+  max_size: 10485760  # 10MB
+  backup_count: 5
+  console_output: true
+
+# Security Configuration
+security:
+  authentication:
+    enabled: false  # Set to true in production
+    method: "jwt"  # or "api_key", "mtls"
+    secret_key: "your-secret-key"
+    token_expiry: 3600  # seconds
+  message_signing:
+    enabled: false
+    algorithm: "HS256"
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 60
+    burst_size: 10
+
+# Performance Configuration
+performance:
+  max_concurrent_requests: 100
+  request_timeout: 30000  # milliseconds
+  connection_pool_size: 20
+  memory_limit: 2147483648  # 2GB
+  cpu_limit: 4  # cores
+  
+# Data Storage Configuration
+storage:
+  base_path: "./data"
+  subdirectories:
+    documents: "documents"
+    embeddings: "embeddings"
+    graphs: "graphs"
+    cache: "cache"
+    logs: "../logs"
+    temp: "../temp"
+    uploads: "uploads"
+    backups: "backups"
+  cleanup:
+    temp_files_retention: 86400  # 24 hours
+    log_retention: 2592000  # 30 days
+    backup_retention: 7776000  # 90 days
+
+# Web Interface Configuration
+web_interface:
+  enabled: true
+  host: "0.0.0.0"
+  port: 8080
+  debug: false
+  cors_enabled: true
+  cors_origins: ["http://localhost:3000", "http://localhost:8080"]
+  static_files: "./web/static"
+  templates: "./web/templates"
+  upload_max_size: 104857600  # 100MB
+  
+# Admin Interface Configuration
+admin_interface:
+  enabled: true
+  host: "0.0.0.0"  
+  port: 8081
+  debug: false
+  authentication:
+    username: "admin"
+    password: "knowledge_admin_2024"  # Change in production
+  monitoring:
+    real_time_updates: true
+    metrics_retention: 7776000  # 90 days
+    
+# Monitoring and Metrics
+monitoring:
+  enabled: true
+  metrics_collection: true
+  health_checks: true
+  performance_tracking: true
+  error_tracking: true
+  prometheus:
+    enabled: false
+    port: 9090
+    endpoint: "/metrics"
+  
+# Feature Flags
+features:
+  experimental_features: false
+  advanced_analytics: true
+  real_time_collaboration: false
+  multi_language_support: false
+  custom_embeddings: true
+  federated_search: false

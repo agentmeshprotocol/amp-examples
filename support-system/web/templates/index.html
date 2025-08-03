@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+
+{% block title %}AMP Customer Support System - Home{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="jumbotron bg-light p-5 rounded mb-4">
+            <h1 class="display-4">
+                <i class="fas fa-robot me-3 text-primary"></i>
+                Welcome to AMP Support
+            </h1>
+            <p class="lead">
+                Intelligent customer support powered by AI agents working together through 
+                the Agent Mesh Protocol (AMP). Get help faster with our automated support system.
+            </p>
+            <hr class="my-4">
+            <p>
+                Our AI agents collaborate to provide you with accurate, timely support across 
+                technical issues, billing questions, product guidance, and more.
+            </p>
+            <a class="btn btn-primary btn-lg" href="/submit" role="button">
+                <i class="fas fa-plus-circle me-2"></i>Submit a Ticket
+            </a>
+            <a class="btn btn-outline-secondary btn-lg ms-2" href="/tickets" role="button">
+                <i class="fas fa-list me-2"></i>View Tickets
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- System Status Row -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card metric-card h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">
+                    <i class="fas fa-ticket-alt text-primary"></i>
+                    Total Tickets
+                </h5>
+                <h2 class="text-primary">{{ total_tickets }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card metric-card h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">
+                    <i class="fas fa-clock text-warning"></i>
+                    Open Tickets
+                </h5>
+                <h2 class="text-warning">{{ open_tickets }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card metric-card h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">
+                    <i class="fas fa-cogs text-info"></i>
+                    AI Agents
+                </h5>
+                <h2 class="text-info">
+                    {% if system_health %}
+                        {{ system_health.healthy_agents }}/{{ system_health.total_agents }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card metric-card h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title">
+                    <i class="fas fa-heartbeat text-success"></i>
+                    System Health
+                </h5>
+                <h2 class="{% if system_health %}text-{{ 'success' if system_health.status == 'healthy' else 'warning' if system_health.status == 'degraded' else 'danger' }}{% endif %}">
+                    {% if system_health %}
+                        {{ system_health.health_percentage|round|int }}%
+                    {% else %}
+                        Unknown
+                    {% endif %}
+                </h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AI Agents Overview -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h3>
+            <i class="fas fa-users-cog me-2"></i>
+            AI Support Agents
+        </h3>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-brain text-primary me-2"></i>
+                            Ticket Classifier
+                        </h5>
+                        <p class="card-text">
+                            Automatically categorizes and prioritizes incoming tickets using 
+                            advanced NLP and sentiment analysis.
+                        </p>
+                        <small class="text-muted">Framework: LangChain</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-tools text-success me-2"></i>
+                            Technical Support
+                        </h5>
+                        <p class="card-text">
+                            Provides systematic troubleshooting and technical problem-solving 
+                            through collaborative agent workflows.
+                        </p>
+                        <small class="text-muted">Framework: CrewAI</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-dollar-sign text-warning me-2"></i>
+                            Billing Support
+                        </h5>
+                        <p class="card-text">
+                            Handles billing inquiries, payment processing, and subscription 
+                            management with multi-agent collaboration.
+                        </p>
+                        <small class="text-muted">Framework: AutoGen</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-lightbulb text-info me-2"></i>
+                            Product Support
+                        </h5>
+                        <p class="card-text">
+                            Provides product guidance, feature explanations, and processes 
+                            enhancement requests with intelligent recommendations.
+                        </p>
+                        <small class="text-muted">Framework: LangChain</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                            Escalation Manager
+                        </h5>
+                        <p class="card-text">
+                            Manages complex cases and coordinates escalations across 
+                            support teams with intelligent routing.
+                        </p>
+                        <small class="text-muted">Framework: Custom</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-book text-secondary me-2"></i>
+                            Knowledge Base
+                        </h5>
+                        <p class="card-text">
+                            Provides instant answers from documentation and FAQs using 
+                            semantic search and retrieval-augmented generation.
+                        </p>
+                        <small class="text-muted">Framework: Custom</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Tickets -->
+{% if recent_tickets %}
+<div class="row">
+    <div class="col-12">
+        <h3>
+            <i class="fas fa-history me-2"></i>
+            Recent Tickets
+        </h3>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Subject</th>
+                        <th>Status</th>
+                        <th>Priority</th>
+                        <th>Customer</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in recent_tickets %}
+                    <tr>
+                        <td>
+                            <code>{{ ticket.id }}</code>
+                        </td>
+                        <td>
+                            <a href="/ticket/{{ ticket.id }}" class="text-decoration-none">
+                                {{ ticket.subject[:50] }}{% if ticket.subject|length > 50 %}...{% endif %}
+                            </a>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary status-{{ ticket.status.value }}">
+                                {{ ticket.status.value|replace('_', ' ')|title }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="priority-{{ ticket.priority.value }}">
+                                <i class="fas fa-flag me-1"></i>
+                                {{ ticket.priority.value|title }}
+                            </span>
+                        </td>
+                        <td>{{ ticket.customer.name }}</td>
+                        <td>
+                            <small>{{ ticket.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </td>
+                        <td>
+                            <a href="/ticket/{{ ticket.id }}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="text-center">
+            <a href="/tickets" class="btn btn-outline-primary">
+                <i class="fas fa-list me-2"></i>View All Tickets
+            </a>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="row">
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <h4>
+                <i class="fas fa-info-circle me-2"></i>
+                No tickets yet
+            </h4>
+            <p>Get started by submitting your first support ticket!</p>
+            <a href="/submit" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-2"></i>Submit a Ticket
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Add some interactive features
+document.addEventListener('DOMContentLoaded', function() {
+    // Add hover effects to metric cards
+    const metricCards = document.querySelectorAll('.metric-card');
+    metricCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+            this.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
+        });
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = '';
+        });
+    });
+});
+</script>
+{% endblock %}

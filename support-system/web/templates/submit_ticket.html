@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block title %}Submit Support Ticket - AMP Support{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    Submit a Support Ticket
+                </h4>
+            </div>
+            <div class="card-body">
+                {% if error %}
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    {{ error }}
+                </div>
+                {% endif %}
+
+                <p class="text-muted mb-4">
+                    Please provide as much detail as possible to help our AI agents 
+                    understand and resolve your issue quickly.
+                </p>
+
+                <form method="post" action="/submit">
+                    <!-- Customer Information -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-user me-2"></i>Customer Information
+                            </h5>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="customer_name" class="form-label">Full Name *</label>
+                            <input type="text" class="form-control" id="customer_name" 
+                                   name="customer_name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="customer_email" class="form-label">Email Address *</label>
+                            <input type="email" class="form-control" id="customer_email" 
+                                   name="customer_email" required>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="customer_phone" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="customer_phone" 
+                                   name="customer_phone" placeholder="Optional">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="sla_level" class="form-label">Account Type</label>
+                            <select class="form-select" id="sla_level" name="sla_level">
+                                {% for sla in sla_levels %}
+                                <option value="{{ sla }}" {% if sla == 'basic' %}selected{% endif %}>
+                                    {{ sla|title }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Ticket Details -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h5 class="border-bottom pb-2 mb-3 mt-4">
+                                <i class="fas fa-ticket-alt me-2"></i>Issue Details
+                            </h5>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="subject" class="form-label">Subject *</label>
+                        <input type="text" class="form-control" id="subject" name="subject" 
+                               placeholder="Brief description of your issue" required>
+                        <div class="form-text">
+                            Provide a clear, concise summary of your issue.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description *</label>
+                        <textarea class="form-control" id="description" name="description" 
+                                  rows="6" placeholder="Please describe your issue in detail..." required></textarea>
+                        <div class="form-text">
+                            Include steps to reproduce the issue, error messages, and any other relevant details.
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-select" id="category" name="category">
+                                {% for cat in categories %}
+                                <option value="{{ cat }}" {% if cat == 'general' %}selected{% endif %}>
+                                    {{ cat|replace('_', ' ')|title }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">
+                                Choose the category that best describes your issue.
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="priority" class="form-label">Priority</label>
+                            <select class="form-select" id="priority" name="priority">
+                                {% for pri in priorities %}
+                                <option value="{{ pri }}" {% if pri == 'medium' %}selected{% endif %}>
+                                    {{ pri|title }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">
+                                Select the urgency level of your issue.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Priority Guidelines -->
+                    <div class="alert alert-light">
+                        <h6><i class="fas fa-info-circle me-2"></i>Priority Guidelines:</h6>
+                        <small>
+                            <strong>Critical:</strong> System down, security breach, data loss<br>
+                            <strong>Urgent:</strong> Major functionality broken, multiple users affected<br>
+                            <strong>High:</strong> Important feature not working, single user blocked<br>
+                            <strong>Medium:</strong> Minor functionality issue, workaround available<br>
+                            <strong>Low:</strong> General questions, feature requests, cosmetic issues
+                        </small>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="/" class="btn btn-outline-secondary me-2">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-2"></i>Submit Ticket
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Help Text -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h6><i class="fas fa-robot me-2"></i>How Our AI Agents Help</h6>
+                <p class="mb-0 text-muted">
+                    Once you submit your ticket, our AI agents will automatically analyze and 
+                    classify it, then route it to the appropriate specialist. You'll receive 
+                    an immediate acknowledgment and our agents will begin working on your issue right away.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-suggest category based on subject/description
+    const subjectField = document.getElementById('subject');
+    const descriptionField = document.getElementById('description');
+    const categoryField = document.getElementById('category');
+    
+    function suggestCategory() {
+        const text = (subjectField.value + ' ' + descriptionField.value).toLowerCase();
+        
+        if (text.includes('bill') || text.includes('payment') || text.includes('invoice') || text.includes('refund')) {
+            categoryField.value = 'billing';
+        } else if (text.includes('login') || text.includes('error') || text.includes('bug') || text.includes('not working')) {
+            categoryField.value = 'technical';
+        } else if (text.includes('feature') || text.includes('how to') || text.includes('tutorial')) {
+            categoryField.value = 'product';
+        } else if (text.includes('account') || text.includes('user') || text.includes('permission')) {
+            categoryField.value = 'account';
+        }
+    }
+    
+    // Auto-suggest priority based on keywords
+    const priorityField = document.getElementById('priority');
+    
+    function suggestPriority() {
+        const text = (subjectField.value + ' ' + descriptionField.value).toLowerCase();
+        
+        if (text.includes('critical') || text.includes('down') || text.includes('outage') || text.includes('emergency')) {
+            priorityField.value = 'critical';
+        } else if (text.includes('urgent') || text.includes('asap') || text.includes('blocking')) {
+            priorityField.value = 'urgent';
+        } else if (text.includes('important') || text.includes('priority')) {
+            priorityField.value = 'high';
+        }
+    }
+    
+    subjectField.addEventListener('blur', function() {
+        suggestCategory();
+        suggestPriority();
+    });
+    
+    descriptionField.addEventListener('blur', function() {
+        suggestCategory();
+        suggestPriority();
+    });
+    
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const subject = subjectField.value.trim();
+        const description = descriptionField.value.trim();
+        
+        if (subject.length < 5) {
+            e.preventDefault();
+            alert('Please provide a more descriptive subject (at least 5 characters).');
+            subjectField.focus();
+            return;
+        }
+        
+        if (description.length < 20) {
+            e.preventDefault();
+            alert('Please provide more details in the description (at least 20 characters).');
+            descriptionField.focus();
+            return;
+        }
+    });
+});
+</script>
+{% endblock %}

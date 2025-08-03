@@ -1,0 +1,236 @@
+name: Bug Report
+description: Report an issue with AMP examples or tutorials
+title: "[BUG] "
+labels: ["bug", "examples", "needs-triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting an issue with AMP examples! Please fill out the form below to help us understand and fix the problem.
+        
+        Before submitting, please:
+        - Search existing issues to avoid duplicates
+        - Check our [examples documentation](https://docs.agentmeshprotocol.io/examples) for updates
+        - Try with the latest version of the relevant SDK
+
+  - type: dropdown
+    id: example-type
+    attributes:
+      label: Example Type
+      description: What type of example has the issue?
+      options:
+        - Python SDK example
+        - TypeScript/JavaScript SDK example
+        - Protocol demonstration
+        - Framework integration example
+        - Tutorial/guide
+        - Code snippet
+        - Configuration example
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: example-location
+    attributes:
+      label: Example Location
+      description: Path or URL to the problematic example
+      placeholder: "examples/python/basic-agent/main.py or https://docs.agentmeshprotocol.io/examples/..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Issue Description
+      description: Clear description of what's wrong with the example
+      placeholder: |
+        - Example doesn't run
+        - Code produces errors
+        - Instructions are unclear
+        - Dependencies are missing
+        - Output doesn't match expectations
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Steps you followed when encountering the issue
+      placeholder: |
+        1. Followed setup instructions in README
+        2. Installed dependencies with...
+        3. Ran the example with...
+        4. Observed error/issue...
+      value: |
+        1. 
+        2. 
+        3. 
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What you expected to happen based on the example
+      placeholder: Describe what the example should do...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened when you ran the example
+      placeholder: Describe what actually happened...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: framework
+    attributes:
+      label: Framework/SDK Used
+      description: Which framework or SDK is this example for?
+      options:
+        - AMP Python SDK
+        - AMP TypeScript SDK
+        - LangChain integration
+        - CrewAI integration
+        - AutoGen integration
+        - Protocol only (no SDK)
+        - Multiple frameworks
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: sdk-version
+    attributes:
+      label: SDK Version
+      description: Version of the SDK used
+      placeholder: "1.0.0"
+
+  - type: dropdown
+    id: language
+    attributes:
+      label: Programming Language
+      description: Programming language of the example
+      options:
+        - Python
+        - TypeScript
+        - JavaScript
+        - Multiple languages
+        - Configuration only
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: language-version
+    attributes:
+      label: Language Version
+      description: Version of the programming language
+      placeholder: "Python 3.9, Node.js 18.17.0"
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      description: Where did you run the example?
+      options:
+        - Local development
+        - Docker container
+        - Cloud platform (AWS/Azure/GCP)
+        - CI/CD pipeline
+        - Jupyter notebook
+        - Colab/online notebook
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      description: Your operating system
+      placeholder: "Ubuntu 20.04 / macOS 12.0 / Windows 11"
+    validations:
+      required: true
+
+  - type: textarea
+    id: error-logs
+    attributes:
+      label: Error Messages/Logs
+      description: Full error messages, stack traces, or logs
+      placeholder: |
+        Paste error messages here...
+      render: text
+
+  - type: textarea
+    id: setup-details
+    attributes:
+      label: Setup Details
+      description: How you set up the example environment
+      placeholder: |
+        - Installation method (pip, npm, etc.)
+        - Virtual environment used
+        - Dependencies installed
+        - Configuration files used
+
+  - type: dropdown
+    id: issue-category
+    attributes:
+      label: Issue Category
+      description: What type of issue is this?
+      options:
+        - Code doesn't run
+        - Missing dependencies
+        - Incorrect instructions
+        - Outdated example
+        - Performance issue
+        - Security concern
+        - Documentation unclear
+        - Configuration problem
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested-fix
+    attributes:
+      label: Suggested Fix
+      description: Do you have any suggestions for fixing this issue?
+      placeholder: |
+        - What might solve the problem
+        - Alternative approaches that work
+        - Missing steps or information
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other relevant information
+      placeholder: |
+        - Screenshots of errors
+        - Related issues or discussions
+        - Alternative examples that work
+        - Environment-specific details
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have searched existing issues for duplicates
+          required: true
+        - label: I have tried with the latest SDK version
+          required: true
+        - label: I have followed the setup instructions carefully
+          required: true
+        - label: I have included complete error messages
+          required: true
+        - label: I have provided environment details
+          required: true

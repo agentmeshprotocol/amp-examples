@@ -1,0 +1,20 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Examples Documentation
+    url: https://docs.agentmeshprotocol.io/examples
+    about: Browse our comprehensive examples and tutorials
+  - name: 🐍 Python Examples
+    url: https://github.com/agentmeshprotocol/amp-examples/tree/main/python
+    about: Python SDK examples and tutorials
+  - name: 🌐 TypeScript Examples
+    url: https://github.com/agentmeshprotocol/amp-examples/tree/main/typescript
+    about: TypeScript/JavaScript SDK examples and tutorials
+  - name: 🔧 Framework Examples
+    url: https://github.com/agentmeshprotocol/amp-examples/tree/main/frameworks
+    about: Framework-specific integration examples
+  - name: 💬 Community Discussions
+    url: https://github.com/orgs/agentmeshprotocol/discussions
+    about: Ask questions and discuss examples with the community
+  - name: 🚀 Quick Start Guide
+    url: https://docs.agentmeshprotocol.io/getting-started
+    about: Get started with AMP using our quick start guide

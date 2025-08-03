@@ -1,0 +1,235 @@
+# Data Analysis Pipeline Configuration
+
+pipeline:
+  name: "AutoGen Data Analysis Pipeline"
+  version: "1.0.0"
+  description: "Complete data analysis pipeline using AutoGen agents with AMP protocol"
+  
+  # Execution settings
+  max_execution_time: 3600  # 1 hour in seconds
+  timeout_per_step: 600     # 10 minutes per step
+  retry_attempts: 3
+  
+  # Component enablement
+  components:
+    data_collection: true
+    data_cleaning: true
+    statistical_analysis: true
+    ml_analysis: true
+    visualization: true
+    quality_assurance: true
+  
+  # Output settings
+  outputs:
+    generate_report: true
+    create_dashboard: true
+    save_artifacts: true
+    export_models: true
+
+# Agent configurations
+agents:
+  data_collector:
+    enabled: true
+    timeout_ms: 15000
+    max_file_size_mb: 500
+    supported_formats: ["csv", "json", "excel", "parquet"]
+    database_timeout: 30
+    api_timeout: 30
+    
+  data_cleaner:
+    enabled: true
+    default_missing_strategy: "median"
+    outlier_method: "iqr"
+    outlier_threshold: 3.0
+    duplicate_threshold: 0.95
+    normalization_method: "standard"
+    
+  statistical_analyst:
+    enabled: true
+    default_alpha: 0.05
+    confidence_level: 0.95
+    min_sample_size: 30
+    correlation_threshold: 0.3
+    
+  ml_analyst:
+    enabled: true
+    default_test_size: 0.2
+    cv_folds: 5
+    random_state: 42
+    max_features_auto: 50
+    feature_selection_threshold: 0.01
+    hyperparameter_tuning: true
+    
+  visualization:
+    enabled: true
+    default_interactive: true
+    figure_size: [10, 6]
+    color_palette: "husl"
+    high_dpi: true
+    font_size: 12
+    
+  quality_assurance:
+    enabled: true
+    data_quality_threshold: 0.8
+    model_performance_threshold: 0.7
+    statistical_significance: 0.05
+    consistency_threshold: 0.9
+
+# Quality thresholds and standards
+quality:
+  data:
+    completeness_threshold: 0.9
+    consistency_threshold: 0.95
+    accuracy_threshold: 0.9
+    uniqueness_threshold: 0.95
+    missing_data_limit: 0.1
+    outlier_limit: 0.05
+    
+  models:
+    min_accuracy: 0.7
+    min_r2_score: 0.6
+    max_overfitting_gap: 0.1
+    min_cv_stability: 0.8
+    
+  statistical:
+    significance_level: 0.05
+    min_power: 0.8
+    effect_size_threshold: 0.2
+    
+  pipeline:
+    documentation_completeness: 0.8
+    reproducibility_score: 0.9
+    compliance_score: 0.8
+
+# AMP Network settings
+amp:
+  protocol_version: "1.0"
+  transport_type: "http"
+  endpoint: "http://localhost:8000"
+  registry_endpoint: null
+  
+  # Connection settings
+  auto_reconnect: true
+  heartbeat_interval: 30
+  message_timeout: 30000
+  max_concurrent_requests: 100
+  retry_backoff: 1.0
+  
+  # Security settings
+  api_key: null
+  enable_encryption: false
+  signature_required: false
+
+# LLM Configuration
+llm:
+  # OpenAI Configuration
+  openai:
+    model: "gpt-4"
+    api_key: "${OPENAI_API_KEY}"
+    api_type: "openai"
+    api_base: null
+    api_version: null
+    temperature: 0.1
+    max_tokens: 2000
+    
+  # Azure OpenAI Configuration (alternative)
+  azure_openai:
+    model: "gpt-4"
+    api_key: "${AZURE_OPENAI_API_KEY}"
+    api_type: "azure"
+    api_base: "${AZURE_OPENAI_ENDPOINT}"
+    api_version: "2023-05-15"
+    deployment_name: "${AZURE_OPENAI_DEPLOYMENT}"
+    temperature: 0.1
+    max_tokens: 2000
+    
+  # Local model configuration (alternative)
+  local:
+    model: "llama2"
+    api_base: "http://localhost:11434"
+    api_key: null
+    temperature: 0.1
+    max_tokens: 2000
+
+# Logging configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: null
+  max_file_size_mb: 10
+  backup_count: 5
+  
+  # Component-specific logging levels
+  components:
+    agents: "INFO"
+    amp_client: "INFO"
+    pipeline: "INFO"
+    visualization: "WARNING"
+    ml: "INFO"
+
+# Storage and output configuration
+storage:
+  base_directory: "./output"
+  create_timestamped_dirs: true
+  
+  # Artifact storage
+  artifacts:
+    save_datasets: true
+    save_models: true
+    save_visualizations: true
+    save_reports: true
+    compression: "gzip"
+    
+  # Export formats
+  exports:
+    datasets: ["csv", "parquet"]
+    models: ["pickle", "joblib"]
+    visualizations: ["png", "html", "json"]
+    reports: ["html", "pdf", "markdown"]
+
+# Performance optimization
+performance:
+  parallel_processing: true
+  max_workers: 4
+  chunk_size: 10000
+  memory_limit_mb: 8192
+  
+  # Caching
+  enable_caching: true
+  cache_directory: "./cache"
+  cache_ttl_hours: 24
+  max_cache_size_mb: 1024
+
+# Environment-specific overrides
+environments:
+  development:
+    logging:
+      level: "DEBUG"
+    performance:
+      max_workers: 2
+    quality:
+      data:
+        completeness_threshold: 0.7
+      models:
+        min_accuracy: 0.6
+        
+  production:
+    logging:
+      level: "WARNING"
+      file: "pipeline.log"
+    quality:
+      data:
+        completeness_threshold: 0.95
+      models:
+        min_accuracy: 0.8
+    performance:
+      max_workers: 8
+      memory_limit_mb: 16384
+      
+  testing:
+    components:
+      quality_assurance: false
+    performance:
+      max_workers: 1
+    storage:
+      save_artifacts: false

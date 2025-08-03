@@ -1,0 +1,51 @@
+# Support System Requirements
+
+# AMP Protocol Dependencies
+asyncio
+aiohttp>=3.8.0
+websockets>=10.0
+pydantic>=1.10.0
+
+# AI Framework Dependencies
+openai>=1.0.0
+langchain>=0.1.0
+langchain-openai>=0.0.6
+crewai>=0.1.0
+pyautogen>=0.2.0
+
+# Web Framework
+fastapi>=0.104.0
+uvicorn>=0.24.0
+jinja2>=3.1.0
+python-multipart>=0.0.6
+
+# Data Processing
+pandas>=1.5.0
+numpy>=1.24.0
+scikit-learn>=1.3.0
+
+# Database (for persistent storage)
+sqlalchemy>=2.0.0
+sqlite3
+
+# Monitoring and Logging
+prometheus-client>=0.17.0
+structlog>=23.0.0
+
+# Utilities
+python-dotenv>=1.0.0
+pyyaml>=6.0
+requests>=2.31.0
+urllib3>=2.0.0
+
+# Development and Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.5.0
+
+# Optional: For advanced NLP features
+# sentence-transformers>=2.2.0
+# chromadb>=0.4.0
+# faiss-cpu>=1.7.0

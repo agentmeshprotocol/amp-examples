@@ -1,0 +1,149 @@
+# FAQ Knowledge Base for the Chatbot System
+
+faqs:
+  # Business Information
+  - question: "What are your business hours?"
+    answer: "Our business hours are Monday-Friday 9AM-6PM EST, and Saturday 10AM-4PM EST. We're closed on Sundays and major holidays."
+    category: "hours"
+    keywords: ["hours", "open", "closed", "time", "schedule"]
+    last_updated: "2024-01-15"
+    
+  - question: "How can I contact customer support?"
+    answer: "You can contact customer support by email at support@company.com, phone at 1-800-SUPPORT (1-800-786-7678), or through this chat system. We're available during business hours."
+    category: "contact"
+    keywords: ["contact", "support", "phone", "email", "help"]
+    last_updated: "2024-01-15"
+    
+  - question: "Where is your company located?"
+    answer: "Our headquarters is located at 123 Business Street, Suite 100, Tech City, TC 12345. We also have remote team members worldwide."
+    category: "company"
+    keywords: ["address", "location", "office", "headquarters", "where"]
+    last_updated: "2024-01-15"
+    
+  # Policies
+  - question: "What is your return policy?"
+    answer: "We offer a 30-day return policy for all products. Items must be in original condition with receipt or order confirmation. Digital products are generally non-returnable unless there's a technical issue."
+    category: "policy"
+    keywords: ["return", "refund", "exchange", "policy", "money back"]
+    last_updated: "2024-01-15"
+    
+  - question: "What is your refund policy?"
+    answer: "Refunds are processed within 5-7 business days after we receive your return. The refund will be credited to your original payment method. Shipping costs are non-refundable unless the return is due to our error."
+    category: "policy"
+    keywords: ["refund", "money", "back", "credit", "payment"]
+    last_updated: "2024-01-15"
+    
+  - question: "Do you offer international shipping?"
+    answer: "Yes, we ship internationally to most countries. Shipping costs and delivery times vary by location. International customers are responsible for any customs duties or taxes."
+    category: "shipping"
+    keywords: ["international", "shipping", "worldwide", "global", "overseas"]
+    last_updated: "2024-01-15"
+    
+  - question: "What are your shipping costs and times?"
+    answer: "Domestic shipping starts at $5.99 (3-5 business days) and goes up to $19.99 for next-day delivery. International shipping ranges from $15-50 depending on destination and takes 7-14 business days."
+    category: "shipping"
+    keywords: ["shipping", "cost", "delivery", "time", "fast"]
+    last_updated: "2024-01-15"
+    
+  # Privacy and Security
+  - question: "How do you protect my personal information?"
+    answer: "We use industry-standard encryption and security measures to protect your data. We never sell your personal information to third parties. Please see our Privacy Policy for complete details."
+    category: "privacy"
+    keywords: ["privacy", "security", "data", "protection", "personal", "information"]
+    last_updated: "2024-01-15"
+    
+  - question: "Do you store my credit card information?"
+    answer: "We use secure, PCI-compliant payment processors and do not store credit card information on our servers. All payment data is handled by certified third-party providers."
+    category: "security"
+    keywords: ["credit card", "payment", "security", "store", "safe"]
+    last_updated: "2024-01-15"
+    
+  # Account and Access
+  - question: "How do I reset my password?"
+    answer: "To reset your password, go to the login page and click 'Forgot Password'. Enter your email address and we'll send you instructions. If you don't receive the email, check your spam folder or contact support."
+    category: "account"
+    keywords: ["password", "reset", "forgot", "login", "access"]
+    last_updated: "2024-01-15"
+    
+  - question: "How do I update my account information?"
+    answer: "Log into your account and go to 'Account Settings' or 'Profile'. You can update your contact information, password, and preferences there. Some changes may require email verification."
+    category: "account"
+    keywords: ["update", "account", "profile", "settings", "change"]
+    last_updated: "2024-01-15"
+    
+  - question: "How do I delete my account?"
+    answer: "To delete your account, please contact our support team at support@company.com. We'll process your request within 5 business days. Note that this action is permanent and cannot be undone."
+    category: "account"
+    keywords: ["delete", "account", "remove", "close", "permanent"]
+    last_updated: "2024-01-15"
+    
+  # Technical Support
+  - question: "What browsers do you support?"
+    answer: "We support the latest versions of Chrome, Firefox, Safari, and Edge. For the best experience, we recommend using an updated browser with JavaScript enabled."
+    category: "technical"
+    keywords: ["browser", "support", "chrome", "firefox", "safari", "edge"]
+    last_updated: "2024-01-15"
+    
+  - question: "Is there a mobile app?"
+    answer: "Yes! Our mobile app is available for iOS and Android devices. You can download it from the App Store or Google Play Store. The app includes most features from our web platform."
+    category: "mobile"
+    keywords: ["mobile", "app", "ios", "android", "phone", "tablet"]
+    last_updated: "2024-01-15"
+    
+  - question: "Do you have an API?"
+    answer: "Yes, we offer a RESTful API for developers. API documentation and access keys are available in your account dashboard. We offer different API tiers based on your subscription plan."
+    category: "technical"
+    keywords: ["api", "integration", "developer", "documentation", "rest"]
+    last_updated: "2024-01-15"
+    
+  # Pricing and Plans
+  - question: "Do you offer student discounts?"
+    answer: "Yes! We offer a 50% discount for verified students and educators. Contact our sales team with your educational email address to verify eligibility and receive your discount code."
+    category: "pricing"
+    keywords: ["student", "discount", "education", "school", "university"]
+    last_updated: "2024-01-15"
+    
+  - question: "Can I change my subscription plan?"
+    answer: "Yes, you can upgrade or downgrade your plan at any time from your account settings. Upgrades take effect immediately, while downgrades take effect at your next billing cycle."
+    category: "subscription"
+    keywords: ["change", "plan", "upgrade", "downgrade", "subscription"]
+    last_updated: "2024-01-15"
+    
+  - question: "Do you offer free trials?"
+    answer: "Yes! We offer a 14-day free trial for all our paid plans. No credit card required to start. You can upgrade to a paid plan anytime during or after your trial."
+    category: "trial"
+    keywords: ["trial", "free", "demo", "test", "try"]
+    last_updated: "2024-01-15"
+    
+  # Company Information
+  - question: "How long has your company been in business?"
+    answer: "We were founded in 2018 and have been serving customers for over 5 years. We're a growing company with a strong track record of customer satisfaction and product innovation."
+    category: "company"
+    keywords: ["founded", "history", "years", "business", "company"]
+    last_updated: "2024-01-15"
+    
+  - question: "What is your mission?"
+    answer: "Our mission is to simplify complex processes through innovative technology solutions, helping businesses and individuals achieve more with less effort. We believe technology should be accessible and user-friendly."
+    category: "company"
+    keywords: ["mission", "values", "purpose", "goal", "vision"]
+    last_updated: "2024-01-15"
+
+# Knowledge base metadata
+metadata:
+  version: "1.0"
+  last_updated: "2024-01-15"
+  total_faqs: 20
+  categories: ["hours", "contact", "company", "policy", "shipping", "privacy", "security", "account", "technical", "mobile", "pricing", "subscription", "trial"]
+  
+# Search configuration
+search_config:
+  similarity_threshold: 0.7
+  max_results: 5
+  enable_fuzzy_matching: true
+  boost_recent_updates: true
+  
+# Content management
+content_management:
+  auto_update_check: true
+  review_frequency_days: 30
+  outdated_threshold_days: 90

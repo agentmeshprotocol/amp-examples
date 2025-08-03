@@ -1,0 +1,515 @@
+# Agent Mesh Protocol - Examples Repository .gitignore
+# Multi-language example implementations, tutorials, and integration patterns
+# Supports Python, TypeScript/JavaScript, and future language implementations
+
+# ==============================================================================
+# Python Examples
+# ==============================================================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# ==============================================================================
+# Node.js/TypeScript Examples
+# ==============================================================================
+
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Package lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build outputs
+dist/
+build/
+lib/
+out/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Coverage reports
+coverage/
+.nyc_output/
+
+# ==============================================================================
+# Rust Examples (Future)
+# ==============================================================================
+
+# Rust build artifacts
+target/
+Cargo.lock
+
+# Rust IDE files
+**/*.rs.bk
+
+# ==============================================================================
+# Go Examples (Future)
+# ==============================================================================
+
+# Go build artifacts
+/vendor/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go modules
+go.sum
+
+# ==============================================================================
+# Java Examples (Future)
+# ==============================================================================
+
+# Java class files
+*.class
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+# Gradle
+.gradle/
+build/
+!gradle-wrapper.jar
+
+# ==============================================================================
+# Example-Specific Artifacts
+# ==============================================================================
+
+# Example execution outputs
+example-outputs/
+demo-results/
+tutorial-results/
+
+# Generated data from examples
+generated-data/
+test-data/
+sample-outputs/
+
+# Example logs
+example-logs/
+demo-logs/
+execution-logs/
+
+# Performance benchmarking results
+benchmark-results/
+performance-data/
+load-test-results/
+
+# Integration test artifacts
+integration-test-logs/
+e2e-test-results/
+
+# ==============================================================================
+# Framework Integration Examples
+# ==============================================================================
+
+# LangChain example artifacts
+langchain-cache/
+.langchain/
+langchain-temp/
+
+# CrewAI example artifacts
+crewai-data/
+.crew/
+crew-temp/
+
+# AutoGen example artifacts
+autogen-cache/
+.autogen/
+autogen-temp/
+
+# Custom framework artifacts
+framework-cache/
+.framework/
+
+# ==============================================================================
+# Multi-Agent System Examples
+# ==============================================================================
+
+# Agent state persistence
+agent-state/
+persistent-data/
+.agent-data/
+
+# Communication logs
+agent-communication-logs/
+message-logs/
+interaction-traces/
+
+# Workflow execution results
+workflow-results/
+task-outputs/
+collaboration-logs/
+
+# ==============================================================================
+# Real-time Examples
+# ==============================================================================
+
+# WebSocket connection logs
+websocket-logs/
+ws-session-data/
+
+# Real-time collaboration artifacts
+realtime-data/
+session-logs/
+connection-traces/
+
+# ==============================================================================
+# Configuration and Environment
+# ==============================================================================
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.staging
+
+# Local configuration files
+config.local.json
+config.local.py
+config.local.js
+config.local.ts
+local.config.*
+
+# Secrets and credentials
+*.secret
+*.private
+secrets.json
+credentials.json
+api-keys.json
+.credentials
+
+# Example-specific configs
+examples/*/config.local.*
+examples/*/.env.local
+
+# ==============================================================================
+# IDE and Editor Files
+# ==============================================================================
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# PyCharm/IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*.un~
+Session.vim
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# ==============================================================================
+# Operating System Files
+# ==============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.tmp
+*.temp
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ==============================================================================
+# Documentation and Media
+# ==============================================================================
+
+# Generated documentation
+docs/generated/
+api-docs/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Large media files (use Git LFS if needed)
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.webm
+
+# Screenshots from example runs (optional, consider including some)
+screenshots/temp/
+demo-recordings/
+
+# ==============================================================================
+# Database and Storage
+# ==============================================================================
+
+# SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Database files
+*.sql
+
+# Key-value stores
+*.ldb
+*.leveldb
+
+# Redis dumps
+dump.rdb
+
+# ==============================================================================
+# Monitoring and Observability
+# ==============================================================================
+
+# Prometheus metrics
+metrics/
+prometheus-data/
+
+# Grafana dashboards (generated)
+grafana-generated/
+
+# Tracing data
+traces/
+jaeger-data/
+zipkin-data/
+
+# Application logs
+app-logs/
+service-logs/
+
+# ==============================================================================
+# Container and Deployment
+# ==============================================================================
+
+# Docker artifacts
+.dockerignore
+docker-compose.override.yml
+
+# Kubernetes generated manifests
+k8s-generated/
+helm-generated/
+
+# Terraform state (if examples include infrastructure)
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# ==============================================================================
+# Security and Compliance
+# ==============================================================================
+
+# Security scan results
+security-reports/
+vulnerability-scans/
+
+# Compliance test results
+compliance-reports/
+
+# Penetration testing artifacts
+pentest-results/
+
+# ==============================================================================
+# Tutorial and Workshop Materials
+# ==============================================================================
+
+# Workshop artifacts
+workshop-data/
+training-materials/temp/
+
+# Student submissions (if applicable)
+submissions/
+student-work/
+
+# Tutorial progress tracking
+progress/
+checkpoints/
+
+# ==============================================================================
+# Version Control and CI/CD
+# ==============================================================================
+
+# Git specific
+*.orig
+*.rej
+
+# GitHub Actions artifacts (local runs)
+.github-actions/
+
+# Pre-commit hooks
+.pre-commit-cache/
+
+# ==============================================================================
+# Logs and Temporary Files
+# ==============================================================================
+
+# General logs
+*.log
+logs/
+log/
+
+# Temporary directories
+tmp/
+temp/
+.tmp/
+
+# Cache directories
+cache/
+.cache/
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# ==============================================================================
+# Example Categories Specific
+# ==============================================================================
+
+# Basic examples outputs
+basic-examples/outputs/
+basic-examples/temp/
+
+# Advanced examples artifacts
+advanced-examples/results/
+advanced-examples/cache/
+
+# Integration examples data
+integration-examples/test-data/
+integration-examples/logs/
+
+# Performance examples results
+performance-examples/benchmarks/
+performance-examples/profiles/
+
+# Security examples artifacts
+security-examples/test-certificates/
+security-examples/generated-keys/
+security-examples/auth-tokens/
+
+# ==============================================================================
+# Third-Party Service Integration
+# ==============================================================================
+
+# OpenAI API cache
+openai-cache/
+.openai/
+
+# Anthropic Claude cache
+claude-cache/
+.anthropic/
+
+# Google services cache
+google-cache/
+.google/
+
+# Microsoft services cache
+microsoft-cache/
+.microsoft/
+
+# Third-party API response cache
+api-cache/
+response-cache/

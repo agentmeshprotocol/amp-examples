@@ -1,0 +1,537 @@
+name: Examples CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run daily to catch SDK compatibility issues
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Type of tests to run'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - python
+          - typescript
+          - integration
+
+env:
+  PYTHON_VERSION: "3.11"
+  NODE_VERSION: "18"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Discover and categorize examples
+  discover-examples:
+    name: Discover Examples
+    runs-on: ubuntu-latest
+    outputs:
+      python-examples: ${{ steps.discover.outputs.python-examples }}
+      typescript-examples: ${{ steps.discover.outputs.typescript-examples }}
+      integration-examples: ${{ steps.discover.outputs.integration-examples }}
+      tutorial-examples: ${{ steps.discover.outputs.tutorial-examples }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Discover example directories
+      id: discover
+      run: |
+        # Find Python examples
+        PYTHON_EXAMPLES=$(find . -name "requirements.txt" -o -name "pyproject.toml" | xargs -I {} dirname {} | grep -E "python|py" | sort | uniq | jq -R -s -c 'split("\n")[:-1]')
+        echo "python-examples=$PYTHON_EXAMPLES" >> $GITHUB_OUTPUT
+        
+        # Find TypeScript/JavaScript examples
+        TS_EXAMPLES=$(find . -name "package.json" | xargs -I {} dirname {} | grep -E "typescript|ts|javascript|js|node" | sort | uniq | jq -R -s -c 'split("\n")[:-1]')
+        echo "typescript-examples=$TS_EXAMPLES" >> $GITHUB_OUTPUT
+        
+        # Find integration examples (contain both Python and TS)
+        INTEGRATION_EXAMPLES=$(find . -type d -exec test -f {}/requirements.txt -a -f {}/package.json \; -print | jq -R -s -c 'split("\n")[:-1]')
+        echo "integration-examples=$INTEGRATION_EXAMPLES" >> $GITHUB_OUTPUT
+        
+        # Find tutorial examples
+        TUTORIAL_EXAMPLES=$(find . -name "README.md" -path "*/tutorials/*" | xargs -I {} dirname {} | jq -R -s -c 'split("\n")[:-1]')
+        echo "tutorial-examples=$TUTORIAL_EXAMPLES" >> $GITHUB_OUTPUT
+
+  # Test Python examples
+  test-python-examples:
+    name: Test Python Examples
+    runs-on: ${{ matrix.os }}
+    if: ${{ needs.discover-examples.outputs.python-examples != '[]' && (github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'python' || github.event.inputs.test_type == '') }}
+    needs: [discover-examples]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ["3.9", "3.11", "3.12"]
+        example: ${{ fromJson(needs.discover-examples.outputs.python-examples) }}
+        exclude:
+          # Reduce matrix size for efficiency
+          - os: macos-latest
+            python-version: "3.9"
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+
+    - name: Install latest AMP Python SDK
+      run: |
+        python -m pip install --upgrade pip
+        # Skip AMP SDK installation as it's not yet published
+        echo "AMP Python SDK not yet available - using local implementations"
+
+    - name: Install example dependencies
+      working-directory: ${{ matrix.example }}
+      run: |
+        if [ -f requirements.txt ]; then
+          pip install -r requirements.txt
+        elif [ -f pyproject.toml ]; then
+          pip install -e .
+        fi
+
+    - name: Run example
+      working-directory: ${{ matrix.example }}
+      timeout-minutes: 10
+      run: |
+        # Find and run the main script
+        if [ -f main.py ]; then
+          python main.py
+        elif [ -f run.py ]; then
+          python run.py
+        elif [ -f app.py ]; then
+          python app.py
+        elif [ -f example.py ]; then
+          python example.py
+        else
+          echo "No recognizable main script found"
+          exit 1
+        fi
+
+    - name: Run example tests
+      working-directory: ${{ matrix.example }}
+      if: hashFiles(format('{0}/test*.py', matrix.example)) != ''
+      run: |
+        python -m pytest . -v
+
+    - name: Upload example logs
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: python-example-logs-${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles(matrix.example) }}
+        path: |
+          ${{ matrix.example }}/*.log
+          ${{ matrix.example }}/logs/
+
+  # Test TypeScript examples
+  test-typescript-examples:
+    name: Test TypeScript Examples
+    runs-on: ${{ matrix.os }}
+    if: ${{ needs.discover-examples.outputs.typescript-examples != '[]' && (github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'typescript' || github.event.inputs.test_type == '') }}
+    needs: [discover-examples]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        node-version: ["16", "18", "20"]
+        example: ${{ fromJson(needs.discover-examples.outputs.typescript-examples) }}
+        exclude:
+          # Reduce matrix size for efficiency
+          - os: macos-latest
+            node-version: "16"
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: ${{ matrix.example }}/package-lock.json
+
+    - name: Install latest AMP TypeScript SDK
+      run: |
+        # Skip AMP SDK installation as it's not yet published
+        echo "AMP TypeScript SDK not yet available - using local implementations"
+
+    - name: Install example dependencies
+      working-directory: ${{ matrix.example }}
+      run: |
+        npm ci || npm install
+
+    - name: Build example
+      working-directory: ${{ matrix.example }}
+      run: |
+        if grep -q '"build"' package.json; then
+          npm run build
+        fi
+
+    - name: Run example
+      working-directory: ${{ matrix.example }}
+      timeout-minutes: 10
+      run: |
+        # Find and run the main script
+        if [ -f src/main.ts ]; then
+          npm run start || npx ts-node src/main.ts
+        elif [ -f src/index.ts ]; then
+          npm run start || npx ts-node src/index.ts
+        elif [ -f main.js ]; then
+          node main.js
+        elif [ -f index.js ]; then
+          node index.js
+        else
+          npm start
+        fi
+
+    - name: Run example tests
+      working-directory: ${{ matrix.example }}
+      if: hashFiles(format('{0}/test/**', matrix.example)) != ''
+      run: |
+        npm test
+
+    - name: Upload example logs
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: typescript-example-logs-${{ matrix.os }}-${{ matrix.node-version }}-${{ hashFiles(matrix.example) }}
+        path: |
+          ${{ matrix.example }}/*.log
+          ${{ matrix.example }}/logs/
+
+  # Test integration examples
+  test-integration-examples:
+    name: Test Integration Examples
+    runs-on: ubuntu-latest
+    if: ${{ needs.discover-examples.outputs.integration-examples != '[]' && (github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'integration' || github.event.inputs.test_type == '') }}
+    needs: [discover-examples]
+    strategy:
+      fail-fast: false
+      matrix:
+        example: ${{ fromJson(needs.discover-examples.outputs.integration-examples) }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: ${{ matrix.example }}/package-lock.json
+
+    - name: Install latest SDKs
+      run: |
+        # Install Python SDK
+        python -m pip install --upgrade pip
+        # Skip AMP SDK installation as it's not yet published
+        echo "AMP Python SDK not yet available - using local implementations"
+        
+        # Install TypeScript SDK
+        # Skip AMP SDK installation as it's not yet published
+        echo "AMP TypeScript SDK not yet available - using local implementations"
+
+    - name: Install example dependencies
+      working-directory: ${{ matrix.example }}
+      run: |
+        # Install Python dependencies
+        if [ -f requirements.txt ]; then
+          pip install -r requirements.txt
+        fi
+        
+        # Install Node.js dependencies
+        if [ -f package.json ]; then
+          npm ci || npm install
+        fi
+
+    - name: Start background services
+      working-directory: ${{ matrix.example }}
+      run: |
+        # Start any required services
+        if [ -f docker-compose.yml ]; then
+          docker-compose up -d
+          sleep 10  # Wait for services to start
+        fi
+
+    - name: Run integration example
+      working-directory: ${{ matrix.example }}
+      timeout-minutes: 15
+      run: |
+        # Run the integration test script
+        if [ -f run_integration.sh ]; then
+          chmod +x run_integration.sh
+          ./run_integration.sh
+        elif [ -f run_integration.py ]; then
+          python run_integration.py
+        elif [ -f package.json ] && grep -q '"integration"' package.json; then
+          npm run integration
+        else
+          echo "No integration script found"
+          exit 1
+        fi
+
+    - name: Cleanup services
+      if: always()
+      working-directory: ${{ matrix.example }}
+      run: |
+        if [ -f docker-compose.yml ]; then
+          docker-compose down
+        fi
+
+    - name: Upload integration logs
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: integration-example-logs-${{ hashFiles(matrix.example) }}
+        path: |
+          ${{ matrix.example }}/*.log
+          ${{ matrix.example }}/logs/
+
+  # Validate tutorial examples
+  validate-tutorials:
+    name: Validate Tutorial Examples
+    runs-on: ubuntu-latest
+    if: ${{ needs.discover-examples.outputs.tutorial-examples != '[]' }}
+    needs: [discover-examples]
+    strategy:
+      matrix:
+        example: ${{ fromJson(needs.discover-examples.outputs.tutorial-examples) }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    - name: Validate README
+      working-directory: ${{ matrix.example }}
+      run: |
+        # Check README exists and has required sections
+        if [ ! -f README.md ]; then
+          echo "❌ No README.md found"
+          exit 1
+        fi
+        
+        # Check for required sections
+        if ! grep -q "# " README.md; then
+          echo "❌ No title found in README"
+          exit 1
+        fi
+        
+        if ! grep -qi "install" README.md; then
+          echo "❌ No installation instructions found"
+          exit 1
+        fi
+        
+        if ! grep -qi "usage\|example\|run" README.md; then
+          echo "❌ No usage instructions found"
+          exit 1
+        fi
+
+    - name: Check code blocks
+      working-directory: ${{ matrix.example }}
+      run: |
+        # Extract and validate code blocks
+        python -c "
+        import re
+        with open('README.md', 'r') as f:
+            content = f.read()
+        
+        # Find code blocks
+        code_blocks = re.findall(r'```(\w+)?\n(.*?)\n```', content, re.DOTALL)
+        
+        for lang, code in code_blocks:
+            if lang in ['python', 'py']:
+                # Basic Python syntax check
+                try:
+                    compile(code, '<string>', 'exec')
+                    print(f'✅ Python code block is valid')
+                except SyntaxError as e:
+                    print(f'❌ Python syntax error: {e}')
+                    exit(1)
+            elif lang in ['javascript', 'js', 'typescript', 'ts']:
+                # Basic JS/TS check (simplified)
+                if 'import' in code and 'from' in code:
+                    print(f'✅ {lang} code block looks valid')
+                else:
+                    print(f'⚠️ {lang} code block validation skipped')
+        "
+
+  # SDK compatibility check
+  sdk-compatibility:
+    name: SDK Compatibility Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    - name: Check SDK versions
+      run: |
+        # Check if SDKs exist and get versions
+        echo "Checking for AMP SDK availability..."
+        
+        # Check Python SDK
+        if pip index versions amp-python-sdk >/dev/null 2>&1; then
+          PYTHON_SDK_VERSION=$(pip index versions amp-python-sdk | head -1 | cut -d' ' -f2)
+          echo "Latest Python SDK: $PYTHON_SDK_VERSION"
+          # Update version references in examples
+          find . -name "requirements.txt" -exec sed -i "s/amp-python-sdk==.*/amp-python-sdk==$PYTHON_SDK_VERSION/" {} \;
+        else
+          echo "amp-python-sdk not yet published - skipping Python SDK updates"
+        fi
+        
+        # Check TypeScript SDK
+        if npm view amp-typescript-sdk version >/dev/null 2>&1; then
+          TS_SDK_VERSION=$(npm view amp-typescript-sdk version)
+          echo "Latest TypeScript SDK: $TS_SDK_VERSION"
+          # Update version references in examples
+          find . -name "package.json" -exec sed -i "s/\"amp-typescript-sdk\": \".*\"/\"amp-typescript-sdk\": \"^$TS_SDK_VERSION\"/" {} \;
+        else
+          echo "amp-typescript-sdk not yet published - skipping TypeScript SDK updates"
+        fi
+        
+        echo "SDK compatibility check completed"
+
+    - name: Create SDK update PR
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: "chore: update SDK versions in examples"
+        title: "🔄 Update SDK versions to latest releases"
+        body: |
+          ## SDK Version Updates
+          
+          This PR updates all examples to use the latest SDK versions.
+          
+          ### Changes
+          - Updated Python SDK references
+          - Updated TypeScript SDK references
+          
+          ### Testing
+          All examples will be tested against the new SDK versions.
+          
+          ---
+          *This PR was created automatically by the SDK compatibility workflow.*
+        branch: sdk-updates/latest
+        delete-branch: true
+        labels: |
+          dependencies
+          automated
+          sdk-updates
+
+  # Generate examples report
+  generate-report:
+    name: Generate Examples Report
+    runs-on: ubuntu-latest
+    needs: [test-python-examples, test-typescript-examples, test-integration-examples, validate-tutorials]
+    if: always()
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts/
+
+    - name: Generate compatibility report
+      run: |
+        python -c "
+        import json
+        import os
+        from datetime import datetime
+        
+        report = {
+            'timestamp': datetime.utcnow().isoformat(),
+            'examples': {
+                'python': {'total': 0, 'passed': 0, 'failed': 0},
+                'typescript': {'total': 0, 'passed': 0, 'failed': 0},
+                'integration': {'total': 0, 'passed': 0, 'failed': 0},
+                'tutorials': {'total': 0, 'passed': 0, 'failed': 0}
+            },
+            'details': []
+        }
+        
+        # Process job results from GitHub context
+        # This would be expanded with actual result processing
+        
+        with open('examples-report.json', 'w') as f:
+            json.dump(report, f, indent=2)
+        
+        print('Examples Report Generated')
+        "
+
+    - name: Upload examples report
+      uses: actions/upload-artifact@v4
+      with:
+        name: examples-report
+        path: examples-report.json
+
+    - name: Comment on PR with report
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          if (fs.existsSync('examples-report.json')) {
+            const report = JSON.parse(fs.readFileSync('examples-report.json', 'utf8'));
+            const comment = `## Examples Test Report
+            
+            **Python Examples**: ${report.examples.python.passed}/${report.examples.python.total} passed
+            **TypeScript Examples**: ${report.examples.typescript.passed}/${report.examples.typescript.total} passed
+            **Integration Examples**: ${report.examples.integration.passed}/${report.examples.integration.total} passed
+            **Tutorial Validation**: ${report.examples.tutorials.passed}/${report.examples.tutorials.total} passed
+            
+            Generated at: ${report.timestamp}`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+          }

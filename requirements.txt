@@ -1,0 +1,53 @@
+# Core AMP dependencies
+asyncio>=3.4.3
+aiohttp>=3.8.0
+websockets>=11.0.0
+pydantic>=2.0.0
+jsonschema>=4.17.0
+pyyaml>=6.0
+python-dotenv>=1.0.0
+
+# Security and authentication
+cryptography>=41.0.0
+pyjwt>=2.8.0
+bcrypt>=4.0.0
+
+# Monitoring and logging
+structlog>=23.1.0
+prometheus-client>=0.17.0
+opentelemetry-api>=1.19.0
+opentelemetry-sdk>=1.19.0
+
+# Database and caching
+redis>=4.6.0
+sqlalchemy>=2.0.0
+alembic>=1.11.0
+
+# Web framework (for HTTP transport)
+fastapi>=0.101.0
+uvicorn>=0.23.0
+
+# Data processing
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-mock>=3.11.0
+httpx>=0.24.0
+
+# Development tools
+black>=23.7.0
+isort>=5.12.0
+flake8>=6.0.0
+mypy>=1.5.0
+
+# Optional ML frameworks (uncomment as needed)
+# torch>=2.0.0
+# transformers>=4.21.0
+# sentence-transformers>=2.2.0
+# chromadb>=0.4.0
+# langchain>=0.0.350
+# crewai>=0.1.0
+# autogen-agentchat>=0.2.0

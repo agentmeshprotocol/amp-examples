@@ -1,0 +1,424 @@
+---
+# AMP Workflow Orchestration Agent Configuration
+
+# Global Configuration
+global:
+  protocol_version: "1.0"
+  log_level: "INFO"
+  log_format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  metrics_enabled: true
+  tracing_enabled: true
+
+# Workflow Engine Configuration
+workflow_engine:
+  agent_id: "workflow-engine"
+  name: "Workflow Engine"
+  port: 8080
+  host: "0.0.0.0"
+  
+  # Workflow Management
+  max_concurrent_workflows: 50
+  workflow_timeout_default: 3600  # 1 hour
+  workflow_cleanup_interval: 300  # 5 minutes
+  max_workflow_history: 1000
+  
+  # File System
+  workflow_definitions_path: "./workflows"
+  supported_formats: ["yaml", "yml", "json"]
+  auto_reload_definitions: true
+  
+  # Performance
+  task_execution_pool_size: 20
+  state_sync_interval: 10  # seconds
+  
+  # Dependencies
+  state_manager_id: "state-manager"
+  condition_evaluator_id: "condition-evaluator"
+  error_handler_id: "error-handler"
+  monitor_agent_id: "monitor-agent"
+
+# Task Executor Configuration
+task_executor:
+  agent_id: "task-executor-1"
+  name: "Task Executor"
+  port: 8081
+  host: "0.0.0.0"
+  
+  # Task Execution
+  max_concurrent_tasks: 10
+  task_timeout_default: 300  # 5 minutes
+  task_cleanup_interval: 60  # 1 minute
+  
+  # Resource Management
+  memory_limit_mb: 1024
+  cpu_limit_percent: 80
+  temp_directory: "/tmp/amp-workflow"
+  
+  # API Call Configuration
+  http_timeout: 30
+  http_retries: 3
+  http_backoff_factor: 2
+  max_response_size_mb: 100
+  
+  # Subprocess Configuration
+  subprocess_timeout: 300
+  max_subprocess_output_size: 1048576  # 1MB
+  allowed_commands: []  # Empty = all allowed
+  
+  # Custom Task Handlers
+  custom_handlers_module: "custom_handlers"
+  custom_handlers_path: "./handlers"
+
+# State Manager Configuration
+state_manager:
+  agent_id: "state-manager"
+  name: "State Manager"
+  port: 8082
+  host: "0.0.0.0"
+  
+  # Storage Backend
+  use_redis: true
+  redis_url: "redis://localhost:6379"
+  redis_db: 0
+  redis_password: null
+  redis_ssl: false
+  
+  # SQLite Configuration
+  sqlite_path: "./workflow_state.db"
+  sqlite_timeout: 30
+  sqlite_journal_mode: "WAL"
+  
+  # Caching
+  cache_ttl: 300  # 5 minutes
+  max_cache_size: 10000
+  cache_cleanup_interval: 60
+  
+  # State Management
+  state_versioning: true
+  max_state_history: 100
+  state_compression: true
+  
+  # Backup
+  backup_enabled: true
+  backup_interval_hours: 24
+  backup_retention_days: 7
+  backup_path: "./backups"
+
+# Condition Evaluator Configuration
+condition_evaluator:
+  agent_id: "condition-evaluator"
+  name: "Condition Evaluator"
+  port: 8083
+  host: "0.0.0.0"
+  
+  # Evaluation
+  cache_ttl: 60  # 1 minute
+  max_cache_size: 1000
+  safe_evaluation: true
+  max_expression_length: 10000
+  evaluation_timeout: 10  # seconds
+  
+  # Python Evaluation
+  allowed_builtins:
+    - "abs"
+    - "all"
+    - "any"
+    - "bool"
+    - "dict"
+    - "float"
+    - "int"
+    - "len"
+    - "list"
+    - "max"
+    - "min"
+    - "round"
+    - "str"
+    - "sum"
+    - "tuple"
+  
+  # Custom Functions
+  custom_functions_enabled: true
+  custom_functions_module: "custom_conditions"
+  
+  # Decision Trees
+  max_tree_depth: 20
+  max_tree_nodes: 1000
+
+# Error Handler Configuration
+error_handler:
+  agent_id: "error-handler"
+  name: "Error Handler"
+  port: 8084
+  host: "0.0.0.0"
+  
+  # Error Processing
+  max_retry_attempts: 3
+  escalation_timeout: 300  # 5 minutes
+  error_history_size: 10000
+  error_analysis_interval: 60
+  
+  # Recovery Strategies
+  default_retry_strategy: "exponential_backoff"
+  max_retry_delay: 300  # 5 minutes
+  circuit_breaker_enabled: true
+  circuit_breaker_threshold: 5
+  circuit_breaker_timeout: 300
+  
+  # Alerting
+  alert_thresholds:
+    low:
+      count: 10
+      window_minutes: 60
+    medium:
+      count: 5
+      window_minutes: 30
+    high:
+      count: 3
+      window_minutes: 15
+    critical:
+      count: 1
+      window_minutes: 5
+  
+  # Escalation
+  escalation_policies:
+    - level: 1
+      timeout_minutes: 5
+      actions: ["log", "metric"]
+    - level: 2
+      timeout_minutes: 15
+      actions: ["log", "metric", "alert"]
+    - level: 3
+      timeout_minutes: 30
+      actions: ["log", "metric", "alert", "escalate"]
+  
+  # Dependencies
+  workflow_engine_id: "workflow-engine"
+  state_manager_id: "state-manager"
+  monitor_agent_id: "monitor-agent"
+
+# Monitor Agent Configuration
+monitor_agent:
+  agent_id: "monitor-agent"
+  name: "Monitor Agent"
+  port: 8085
+  host: "0.0.0.0"
+  
+  # Metrics Collection
+  metrics_retention_hours: 168  # 7 days
+  metrics_aggregation_interval: 60  # 1 minute
+  performance_history_size: 10000
+  
+  # Health Monitoring
+  health_check_interval: 30  # seconds
+  agent_timeout_threshold: 300  # 5 minutes
+  system_metrics_enabled: true
+  
+  # Alerting
+  alert_check_interval: 60  # 1 minute
+  alert_retention_days: 30
+  max_alerts_per_hour: 100
+  
+  # Dashboard
+  dashboard_refresh_interval: 30  # seconds
+  dashboard_data_retention: 3600  # 1 hour
+  
+  # Prometheus Integration (optional)
+  prometheus_enabled: false
+  prometheus_port: 9090
+  prometheus_metrics_path: "/metrics"
+  
+  # External Integrations
+  webhook_notifications: []
+  email_notifications: []
+  slack_notifications: []
+
+# Web Dashboard Configuration
+web_dashboard:
+  agent_id: "web-dashboard"
+  name: "Web Dashboard"
+  port: 8090
+  host: "0.0.0.0"
+  
+  # Web Server
+  debug_mode: false
+  auto_reload: false
+  workers: 1
+  
+  # Security
+  cors_enabled: true
+  cors_origins: ["*"]
+  rate_limiting: true
+  rate_limit_per_minute: 100
+  
+  # Authentication (optional)
+  auth_enabled: false
+  jwt_secret: "your-secret-key"
+  jwt_expiration_hours: 24
+  
+  # WebSocket
+  websocket_ping_interval: 30
+  websocket_ping_timeout: 10
+  max_websocket_connections: 100
+  
+  # File Upload
+  max_file_size_mb: 10
+  allowed_file_types: [".yaml", ".yml", ".json"]
+  upload_directory: "./uploads"
+  
+  # Dependencies
+  workflow_engine_id: "workflow-engine"
+  monitor_agent_id: "monitor-agent"
+  state_manager_id: "state-manager"
+
+# Network Configuration
+network:
+  # Connection Settings
+  connection_timeout: 30
+  read_timeout: 60
+  max_connections: 100
+  keep_alive: true
+  
+  # Retry Configuration
+  max_retries: 3
+  retry_backoff_factor: 2
+  retry_status_codes: [500, 502, 503, 504]
+  
+  # TLS Configuration (for production)
+  tls_enabled: false
+  cert_file: ""
+  key_file: ""
+  ca_file: ""
+  verify_ssl: true
+  
+  # Message Size Limits
+  max_message_size_mb: 10
+  compression_enabled: true
+  compression_threshold: 1024
+
+# Logging Configuration
+logging:
+  # Global Settings
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  
+  # File Logging
+  file_logging: true
+  log_file: "./logs/amp-workflow.log"
+  max_file_size_mb: 100
+  backup_count: 5
+  
+  # Console Logging
+  console_logging: true
+  console_level: "INFO"
+  
+  # Structured Logging
+  structured_logging: false
+  json_format: false
+  
+  # Log Rotation
+  rotation_when: "midnight"
+  rotation_interval: 1
+  
+  # Per-Agent Logging
+  agent_specific_levels:
+    workflow-engine: "INFO"
+    task-executor-1: "INFO"
+    state-manager: "INFO"
+    condition-evaluator: "INFO"
+    error-handler: "INFO"
+    monitor-agent: "INFO"
+    web-dashboard: "INFO"
+
+# Database Configuration
+database:
+  # SQLite Settings
+  sqlite:
+    path: "./workflow_state.db"
+    timeout: 30
+    check_same_thread: false
+    journal_mode: "WAL"
+    synchronous: "NORMAL"
+    cache_size: 10000
+    
+  # Redis Settings
+  redis:
+    enabled: true
+    url: "redis://localhost:6379"
+    db: 0
+    password: null
+    ssl: false
+    encoding: "utf-8"
+    decode_responses: true
+    
+    # Connection Pool
+    max_connections: 20
+    retry_on_timeout: true
+    health_check_interval: 30
+    
+    # Clustering (for production)
+    cluster_enabled: false
+    cluster_nodes: []
+    cluster_skip_full_coverage_check: false
+
+# Security Configuration
+security:
+  # Authentication
+  auth_enabled: false
+  auth_type: "jwt"  # jwt, api_key, mtls
+  
+  # JWT Configuration
+  jwt:
+    secret: "your-secret-key-change-in-production"
+    algorithm: "HS256"
+    expiration_hours: 24
+    issuer: "amp-workflow"
+    
+  # API Key Configuration
+  api_key:
+    header_name: "X-API-Key"
+    valid_keys: []
+    
+  # mTLS Configuration
+  mtls:
+    enabled: false
+    cert_file: ""
+    key_file: ""
+    ca_file: ""
+    
+  # Message Signing
+  message_signing: false
+  signing_key: ""
+  signing_algorithm: "HS256"
+  
+  # Rate Limiting
+  rate_limiting:
+    enabled: true
+    global_limit: 1000  # requests per hour
+    per_agent_limit: 100  # requests per hour
+    burst_size: 10
+
+# Monitoring and Observability
+observability:
+  # Metrics
+  metrics:
+    enabled: true
+    collection_interval: 60
+    retention_days: 7
+    
+  # Tracing
+  tracing:
+    enabled: false
+    jaeger_endpoint: ""
+    sampling_rate: 0.1
+    
+  # Health Checks
+  health_checks:
+    enabled: true
+    endpoint: "/health"
+    interval: 30
+    timeout: 10
+    
+  # Profiling
+  profiling:
+    enabled: false
+    port: 6060

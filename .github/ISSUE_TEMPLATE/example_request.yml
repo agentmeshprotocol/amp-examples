@@ -1,0 +1,316 @@
+name: Example Request
+description: Request a new example, tutorial, or improvement to existing examples
+title: "[EXAMPLE] "
+labels: ["enhancement", "examples", "needs-triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a new example or improvement! Examples are crucial for helping developers understand and adopt AMP.
+        
+        Before submitting:
+        - Check our [examples repository](https://github.com/agentmeshprotocol/amp-examples) for existing content
+        - Review our [examples documentation](https://docs.agentmeshprotocol.io/examples)
+        - Search existing issues to avoid duplicates
+
+  - type: dropdown
+    id: request-type
+    attributes:
+      label: Request Type
+      description: What type of example are you requesting?
+      options:
+        - New example/tutorial
+        - Improve existing example
+        - Fix outdated example
+        - Add more detailed comments
+        - Add alternative implementation
+        - Framework-specific version
+        - Language-specific version
+        - Use case demonstration
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case Description
+      description: Describe the use case this example should demonstrate
+      placeholder: |
+        What problem does this example solve?
+        What scenario does it demonstrate?
+        Who would benefit from this example?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: target-audience
+    attributes:
+      label: Target Audience
+      description: Who is the primary audience for this example?
+      options:
+        - Beginners (new to AMP)
+        - Intermediate developers
+        - Advanced developers
+        - Framework-specific developers
+        - Enterprise developers
+        - Researchers/academics
+        - All audiences
+    validations:
+      required: true
+
+  - type: dropdown
+    id: example-category
+    attributes:
+      label: Example Category
+      description: What category does this example fit into?
+      options:
+        - Basic/Getting Started
+        - Framework Integration
+        - Multi-Agent Communication
+        - Protocol Demonstration
+        - Real-World Application
+        - Performance/Optimization
+        - Security Implementation
+        - Testing/Validation
+        - Best Practices
+        - Tutorial/Guide
+        - Configuration Example
+        - Troubleshooting
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: language-framework
+    attributes:
+      label: Language/Framework
+      description: Which language or framework should this example use?
+      options:
+        - Python (AMP Python SDK)
+        - TypeScript/JavaScript (AMP TypeScript SDK)
+        - Python + LangChain
+        - Python + CrewAI
+        - Python + AutoGen
+        - TypeScript + specific framework
+        - Multiple languages
+        - Framework-agnostic
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: complexity
+    attributes:
+      label: Complexity Level
+      description: How complex should this example be?
+      options:
+        - Simple (basic demonstration)
+        - Moderate (real-world scenario)
+        - Complex (comprehensive implementation)
+        - Progressive (starts simple, builds complexity)
+    validations:
+      required: true
+
+  - type: textarea
+    id: specific-features
+    attributes:
+      label: Specific AMP Features to Demonstrate
+      description: Which AMP features should this example showcase?
+      placeholder: |
+        - Message passing between agents
+        - Capability registration and discovery
+        - Event handling
+        - Error handling and recovery
+        - Security/authentication
+        - Context management
+        - Tool/function calling
+        - Multi-framework integration
+      value: |
+        - [ ] Message passing between agents
+        - [ ] Capability registration and discovery
+        - [ ] Event handling
+        - [ ] Error handling and recovery
+        - [ ] Security/authentication
+        - [ ] Context management
+        - [ ] Tool/function calling
+        - [ ] Multi-framework integration
+    validations:
+      required: true
+
+  - type: textarea
+    id: example-outline
+    attributes:
+      label: Example Outline
+      description: Provide a rough outline of what the example should include
+      placeholder: |
+        1. Setup and configuration
+        2. Agent initialization
+        3. Capability registration
+        4. Message handling
+        5. Error scenarios
+        6. Cleanup and teardown
+      value: |
+        1. 
+        2. 
+        3. 
+        4. 
+        5. 
+
+  - type: textarea
+    id: code-structure
+    attributes:
+      label: Proposed Code Structure
+      description: How should the example code be organized?
+      placeholder: |
+        example-name/
+        ├── README.md
+        ├── main.py (or main.ts)
+        ├── config.json
+        ├── requirements.txt (or package.json)
+        └── docs/
+            └── explanation.md
+
+  - type: textarea
+    id: real-world-scenario
+    attributes:
+      label: Real-World Scenario
+      description: Describe a real-world scenario this example relates to
+      placeholder: |
+        - Customer service automation
+        - Content generation pipeline
+        - Data analysis workflow
+        - Multi-modal processing
+        - Enterprise integration
+
+  - type: dropdown
+    id: deployment-context
+    attributes:
+      label: Deployment Context
+      description: What deployment scenario should this example address?
+      options:
+        - Local development
+        - Docker containers
+        - Cloud deployment (AWS/Azure/GCP)
+        - Serverless functions
+        - Microservices architecture
+        - Edge computing
+        - Multiple contexts
+        - Not applicable
+    validations:
+      required: true
+
+  - type: textarea
+    id: learning-objectives
+    attributes:
+      label: Learning Objectives
+      description: What should developers learn from this example?
+      placeholder: |
+        After completing this example, developers should understand:
+        - How to set up AMP agents
+        - How to implement secure communication
+        - How to handle errors gracefully
+        - Best practices for production deployment
+
+  - type: textarea
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: What knowledge or setup should be required?
+      placeholder: |
+        - Basic Python/TypeScript knowledge
+        - Understanding of async programming
+        - Familiarity with specific frameworks
+        - Development environment setup
+
+  - type: dropdown
+    id: documentation-level
+    attributes:
+      label: Documentation Level
+      description: How thoroughly documented should this example be?
+      options:
+        - Basic (code comments only)
+        - Standard (README + inline comments)
+        - Comprehensive (README + detailed explanation + diagrams)
+        - Tutorial format (step-by-step guide)
+    validations:
+      required: true
+
+  - type: textarea
+    id: testing-requirements
+    attributes:
+      label: Testing Requirements
+      description: What testing should be included with this example?
+      placeholder: |
+        - Unit tests for key functions
+        - Integration tests
+        - End-to-end testing
+        - Performance benchmarks
+        - Error scenario testing
+
+  - type: input
+    id: existing-reference
+    attributes:
+      label: Existing Reference
+      description: Link to existing example that needs improvement (if applicable)
+      placeholder: "examples/python/basic-agent/ or URL"
+
+  - type: textarea
+    id: inspiration
+    attributes:
+      label: Inspiration/References
+      description: Any existing examples or resources that inspired this request?
+      placeholder: |
+        - Similar examples in other projects
+        - Documentation that could be turned into examples
+        - Community requests or discussions
+        - Real implementations you've seen
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this example for the community?
+      options:
+        - Low (nice to have)
+        - Medium (would help adoption)
+        - High (important for common use case)
+        - Critical (blocks understanding of key features)
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I would be willing to implement this example
+        - label: I would be willing to help with documentation
+        - label: I would be willing to help with testing
+        - label: I can provide domain expertise for the use case
+        - label: I can provide real-world validation
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other relevant information
+      placeholder: |
+        - Community interest or demand
+        - Timeline considerations
+        - Related examples needed
+        - Specific challenges to address
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have searched existing examples and issues
+          required: true
+        - label: I have clearly described the use case and audience
+          required: true
+        - label: I have provided sufficient detail for implementation
+          required: true
+        - label: I understand this may require significant effort to implement
+          required: true

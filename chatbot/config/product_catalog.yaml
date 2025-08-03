@@ -1,0 +1,252 @@
+# Product Catalog for Sales Agent
+
+products:
+  - name: "Starter Plan"
+    id: "starter"
+    price: 19.99
+    billing_cycle: "monthly"
+    annual_price: 199.99
+    features:
+      - "Up to 5 users"
+      - "10GB storage"
+      - "Email support"
+      - "Basic analytics"
+      - "Standard templates"
+      - "Mobile app access"
+    description: "Perfect for small teams and individuals getting started"
+    target_audience: "small business, startup, individual, freelancer"
+    category: "basic"
+    max_users: 5
+    storage_gb: 10
+    support_level: "email"
+    trial_days: 14
+    popular: false
+    
+  - name: "Professional Plan" 
+    id: "professional"
+    price: 49.99
+    billing_cycle: "monthly"
+    annual_price: 499.99
+    features:
+      - "Up to 25 users"
+      - "100GB storage"
+      - "Priority email support"
+      - "Advanced analytics"
+      - "Custom templates"
+      - "API access"
+      - "Team collaboration tools"
+      - "Custom branding"
+    description: "Ideal for growing businesses and professional teams"
+    target_audience: "medium business, growing team, professional services"
+    category: "professional"
+    max_users: 25
+    storage_gb: 100
+    support_level: "priority_email"
+    trial_days: 14
+    popular: true
+    
+  - name: "Business Plan"
+    id: "business"
+    price: 99.99
+    billing_cycle: "monthly"
+    annual_price: 999.99
+    features:
+      - "Up to 100 users"
+      - "500GB storage"
+      - "Phone + email support"
+      - "Advanced analytics + reporting"
+      - "Unlimited templates"
+      - "Full API access"
+      - "Advanced integrations"
+      - "Priority support"
+      - "Single Sign-On (SSO)"
+      - "Advanced security features"
+    description: "Comprehensive solution for established businesses"
+    target_audience: "established business, large team, corporate"
+    category: "business"
+    max_users: 100
+    storage_gb: 500
+    support_level: "phone_email"
+    trial_days: 14
+    popular: false
+    
+  - name: "Enterprise Plan"
+    id: "enterprise"
+    price: 199.99
+    billing_cycle: "monthly"
+    annual_price: 1999.99
+    features:
+      - "Unlimited users"
+      - "1TB+ storage"
+      - "24/7 phone support"
+      - "Custom analytics + reporting"
+      - "Unlimited everything"
+      - "Full API access"
+      - "Custom integrations"
+      - "Dedicated account manager"
+      - "Enterprise SSO"
+      - "Advanced security + compliance"
+      - "White-label options"
+      - "SLA guarantees"
+    description: "Complete enterprise solution with premium support"
+    target_audience: "enterprise, large corporation, government"
+    category: "enterprise"
+    max_users: "unlimited"
+    storage_gb: 1000
+    support_level: "24_7_dedicated"
+    trial_days: 30
+    popular: false
+    
+  - name: "Custom Solution"
+    id: "custom"
+    price: 0  # Contact for pricing
+    billing_cycle: "custom"
+    annual_price: 0
+    features:
+      - "Fully customizable features"
+      - "Dedicated infrastructure"
+      - "24/7 premium support"
+      - "Custom development"
+      - "On-premise deployment option"
+      - "Custom integrations"
+      - "Training and onboarding"
+      - "Service level agreements"
+      - "Compliance certifications"
+      - "Dedicated customer success manager"
+    description: "Tailored solutions for unique business requirements"
+    target_audience: "enterprise, specific needs, custom requirements, compliance-heavy industries"
+    category: "custom"
+    max_users: "unlimited"
+    storage_gb: "unlimited"
+    support_level: "premium_dedicated"
+    trial_days: 30
+    popular: false
+
+# Add-ons and extras
+addons:
+  - name: "Additional Storage"
+    id: "extra_storage"
+    price_per_gb: 0.10
+    billing_cycle: "monthly"
+    description: "Extra storage space for your data"
+    compatible_plans: ["starter", "professional", "business"]
+    
+  - name: "Additional Users"
+    id: "extra_users"
+    price_per_user: 5.99
+    billing_cycle: "monthly"
+    description: "Add more team members to your plan"
+    compatible_plans: ["starter", "professional", "business"]
+    
+  - name: "Priority Support"
+    id: "priority_support"
+    price: 29.99
+    billing_cycle: "monthly"
+    description: "Get faster response times and phone support"
+    compatible_plans: ["starter"]
+    
+  - name: "Advanced Analytics"
+    id: "advanced_analytics"
+    price: 19.99
+    billing_cycle: "monthly"
+    description: "Detailed reporting and business intelligence"
+    compatible_plans: ["starter", "professional"]
+    
+  - name: "Custom Integrations"
+    id: "custom_integrations"
+    price: 99.99
+    billing_cycle: "monthly"
+    description: "Connect with your existing business tools"
+    compatible_plans: ["professional", "business"]
+
+# Discounts and promotions
+discounts:
+  annual_discount:
+    description: "Save 20% with annual billing"
+    percentage: 20
+    applies_to: "all_plans"
+    
+  student_discount:
+    description: "50% off for students and educators"
+    percentage: 50
+    applies_to: "all_plans"
+    verification_required: true
+    
+  nonprofit_discount:
+    description: "30% off for registered nonprofits"
+    percentage: 30
+    applies_to: "all_plans"
+    verification_required: true
+    
+  startup_discount:
+    description: "6 months free for qualifying startups"
+    type: "free_months"
+    value: 6
+    applies_to: ["professional", "business"]
+    verification_required: true
+
+# Sales configuration
+sales_config:
+  default_trial_days: 14
+  payment_methods: ["credit_card", "paypal", "bank_transfer", "invoice"]
+  currencies: ["USD", "EUR", "GBP", "CAD"]
+  billing_frequencies: ["monthly", "annually"]
+  
+  # Lead scoring factors
+  lead_scoring:
+    mentions_budget: 15
+    mentions_timeline: 10
+    asks_about_features: 8
+    requests_demo: 12
+    company_size_large: 20
+    decision_maker_keywords: 15
+    competitor_mention: 10
+    urgent_language: 8
+    
+  # Upselling rules
+  upselling:
+    storage_usage_threshold: 0.8  # Suggest upgrade at 80% usage
+    user_limit_threshold: 0.9     # Suggest upgrade at 90% of user limit
+    feature_request_frequency: 3   # Suggest upgrade after 3 feature requests
+    
+# Competitive analysis
+competitors:
+  - name: "Competitor A"
+    strengths: ["Lower price", "Simple interface"]
+    weaknesses: ["Limited features", "Poor support"]
+    our_advantages: ["Better feature set", "Superior support", "More integrations"]
+    
+  - name: "Competitor B"
+    strengths: ["Enterprise focus", "Established brand"]
+    weaknesses: ["Expensive", "Complex setup"]
+    our_advantages: ["Better pricing", "Easier to use", "Faster implementation"]
+    
+  - name: "Competitor C"
+    strengths: ["Free tier", "Good marketing"]
+    weaknesses: ["Limited scalability", "Data privacy concerns"]
+    our_advantages: ["Better security", "More scalable", "Transparent pricing"]
+
+# Product messaging
+messaging:
+  value_propositions:
+    - "Save time with automated workflows"
+    - "Scale your business without limits"
+    - "Get insights that drive growth"
+    - "Collaborate seamlessly with your team"
+    - "Integrate with tools you already use"
+    
+  pain_points_addressed:
+    - "Manual processes taking too much time"
+    - "Difficulty collaborating across teams"
+    - "Lack of visibility into business metrics"
+    - "Tools that don't integrate well"
+    - "Expensive enterprise solutions"
+    
+  target_industries:
+    - "Professional services"
+    - "E-commerce"
+    - "Technology"
+    - "Healthcare"
+    - "Education"
+    - "Manufacturing"
+    - "Financial services"

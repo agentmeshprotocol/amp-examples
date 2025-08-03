@@ -1,0 +1,253 @@
+# Research Assistant Network - Requirements
+# Core AMP and Research Assistant dependencies for Python 3.8+
+
+# ============================================================================
+# CrewAI Framework and Core Dependencies
+# ============================================================================
+crewai>=0.1.0
+crewai-tools>=0.1.0
+langchain>=0.1.0
+langchain-openai>=0.1.0
+langchain-community>=0.1.0
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+
+# ============================================================================
+# LLM and AI Model Dependencies
+# ============================================================================
+openai>=1.0.0
+anthropic>=0.3.0
+transformers>=4.35.0
+torch>=2.0.0
+sentence-transformers>=2.2.0
+tokenizers>=0.15.0
+
+# ============================================================================
+# Natural Language Processing
+# ============================================================================
+spacy>=3.7.0
+nltk>=3.8.0
+textstat>=0.7.0
+scikit-learn>=1.3.0
+numpy>=1.24.0
+
+# SpaCy English model (install separately with: python -m spacy download en_core_web_sm)
+
+# ============================================================================
+# Web Scraping and Content Extraction
+# ============================================================================
+requests>=2.31.0
+aiohttp>=3.9.0
+beautifulsoup4>=4.12.0
+newspaper3k>=0.2.8
+lxml>=4.9.0
+html5lib>=1.1
+readability-lxml>=0.8.1
+
+# ============================================================================
+# Search APIs and Tools
+# ============================================================================
+duckduckgo-search>=3.9.0
+google-api-python-client>=2.100.0
+google-auth>=2.20.0
+google-auth-oauthlib>=1.0.0
+google-auth-httplib2>=0.1.0
+
+# ============================================================================
+# Data Processing and Analysis
+# ============================================================================
+pandas>=2.0.0
+numpy>=1.24.0
+scipy>=1.11.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# ============================================================================
+# Database and Storage
+# ============================================================================
+sqlalchemy>=2.0.0
+alembic>=1.12.0
+redis>=4.6.0
+pymongo>=4.5.0
+
+# ============================================================================
+# Configuration and Environment Management
+# ============================================================================
+pyyaml>=6.0.0
+python-dotenv>=1.0.0
+configparser>=6.0.0
+jsonschema>=4.19.0
+
+# ============================================================================
+# HTTP Server and API Framework
+# ============================================================================
+fastapi>=0.104.0
+uvicorn>=0.24.0
+starlette>=0.27.0
+
+# ============================================================================
+# Async and Concurrency
+# ============================================================================
+asyncio>=3.4.3
+aiofiles>=23.2.0
+aiodns>=3.1.0
+aioredis>=2.0.0
+
+# ============================================================================
+# Testing Framework
+# ============================================================================
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-mock>=3.11.0
+pytest-cov>=4.1.0
+httpx>=0.25.0  # For testing async HTTP clients
+
+# ============================================================================
+# Code Quality and Formatting
+# ============================================================================
+black>=23.9.0
+isort>=5.12.0
+flake8>=6.1.0
+mypy>=1.6.0
+pre-commit>=3.4.0
+
+# ============================================================================
+# Logging and Monitoring
+# ============================================================================
+structlog>=23.2.0
+prometheus-client>=0.17.0
+psutil>=5.9.0
+
+# ============================================================================
+# Date and Time Handling
+# ============================================================================
+python-dateutil>=2.8.0
+pytz>=2023.3
+
+# ============================================================================
+# Security and Authentication
+# ============================================================================
+cryptography>=41.0.0
+pyjwt>=2.8.0
+bcrypt>=4.0.0
+passlib>=1.7.4
+
+# ============================================================================
+# File Processing
+# ============================================================================
+python-magic>=0.4.27
+pypdf2>=3.0.0
+python-docx>=0.8.11
+openpyxl>=3.1.0
+
+# ============================================================================
+# Network and URL Processing
+# ============================================================================
+urllib3>=2.0.0
+validators>=0.22.0
+tldextract>=5.0.0
+
+# ============================================================================
+# Image Processing (Optional)
+# ============================================================================
+pillow>=10.0.0
+opencv-python>=4.8.0
+
+# ============================================================================
+# Development and Debugging Tools
+# ============================================================================
+ipython>=8.15.0
+jupyter>=1.0.0
+notebook>=7.0.0
+
+# ============================================================================
+# Performance Optimization
+# ============================================================================
+cython>=3.0.0
+numba>=0.58.0
+
+# ============================================================================
+# Additional Utility Libraries
+# ============================================================================
+tqdm>=4.66.0  # Progress bars
+click>=8.1.0  # CLI framework
+rich>=13.6.0  # Rich text and beautiful formatting
+tabulate>=0.9.0  # Table formatting
+
+# ============================================================================
+# AMP Protocol Dependencies (from shared-lib)
+# ============================================================================
+# Note: These are included in the shared-lib module
+# websockets>=11.0.0
+# jsonrpc-websocket>=3.1.0
+# protobuf>=4.24.0
+
+# ============================================================================
+# Optional Dependencies for Enhanced Features
+# ============================================================================
+
+# For advanced NLP features
+# spacy-transformers>=1.3.0
+
+# For GPU acceleration (if available)
+# torch-audio>=2.0.0
+# torchaudio>=2.0.0
+
+# For advanced web scraping
+# selenium>=4.15.0
+# playwright>=1.40.0
+
+# For database drivers
+# psycopg2-binary>=2.9.0  # PostgreSQL
+# pymysql>=1.1.0  # MySQL
+
+# For cloud storage
+# boto3>=1.29.0  # AWS S3
+# google-cloud-storage>=2.10.0  # Google Cloud Storage
+
+# For advanced caching
+# diskcache>=5.6.0
+# cachetools>=5.3.0
+
+# ============================================================================
+# Platform-Specific Dependencies
+# ============================================================================
+
+# Windows-specific
+# pywin32>=306; sys_platform == "win32"
+
+# macOS-specific
+# pyobjc>=10.0; sys_platform == "darwin"
+
+# Linux-specific
+# python-magic>=0.4.27; sys_platform == "linux"
+
+# ============================================================================
+# Version Constraints and Compatibility Notes
+# ============================================================================
+
+# Python version compatibility: >=3.8,<3.12
+# Some packages may require specific Python versions:
+# - transformers: requires Python >=3.8
+# - torch: requires Python >=3.8
+# - spacy: requires Python >=3.8
+
+# GPU Support:
+# For CUDA support, install torch with CUDA:
+# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+# Apple Silicon (M1/M2) Mac:
+# Some packages may need special installation:
+# pip install torch torchvision torchaudio
+
+# Memory Requirements:
+# The research assistant requires significant memory for NLP models:
+# - Minimum: 4GB RAM
+# - Recommended: 8GB+ RAM
+# - For large models: 16GB+ RAM
+
+# Disk Space:
+# NLP models require substantial disk space:
+# - SpaCy models: ~500MB
+# - Transformer models: 1-5GB
+# - Total recommended: 10GB+ free space

@@ -1,0 +1,361 @@
+# AutoGen Agent Configuration for Data Analysis Pipeline
+
+# Agent system messages and personalities
+agent_personalities:
+  data_collector:
+    name: "DataCollector"
+    role: "Data Ingestion Specialist"
+    personality: "Methodical and thorough data collection expert"
+    system_message: |
+      You are a Data Collector Agent specialized in ingesting data from various sources.
+      
+      Your responsibilities:
+      - Connect to and retrieve data from files, databases, and APIs
+      - Validate data source quality and accessibility  
+      - Provide metadata about collected datasets
+      - Handle various data formats and connection types
+      - Ensure data integrity during collection process
+      
+      You work collaboratively with other agents in the data analysis pipeline. 
+      Always provide clear information about the data you collect, including shape, 
+      structure, and any potential quality issues discovered during ingestion.
+    
+  data_cleaner:
+    name: "DataCleaner"
+    role: "Data Preprocessing Specialist"
+    personality: "Detail-oriented and quality-focused data cleaning expert"
+    system_message: |
+      You are a Data Cleaner Agent specialized in data preprocessing and quality improvement.
+      
+      Your responsibilities:
+      - Detect and handle missing values using appropriate imputation strategies
+      - Identify and manage outliers through statistical methods
+      - Normalize and scale numerical data for analysis
+      - Remove duplicate records and ensure data uniqueness
+      - Assess overall data quality and provide improvement recommendations
+      
+      You work collaboratively with other agents in the data analysis pipeline. 
+      Always provide detailed reports about the cleaning operations performed and 
+      the impact on data quality.
+    
+  statistical_analyst:
+    name: "StatisticalAnalyst"
+    role: "Statistical Analysis Expert"
+    personality: "Rigorous and analytical statistical expert"
+    system_message: |
+      You are a Statistical Analyst Agent specialized in statistical analysis and hypothesis testing.
+      
+      Your responsibilities:
+      - Perform descriptive statistical analysis and summarize data distributions
+      - Conduct hypothesis testing using appropriate statistical tests
+      - Analyze correlations and associations between variables
+      - Build and validate regression models with proper diagnostics
+      - Test data distributions and assess normality assumptions
+      
+      You work collaboratively with other agents in the data analysis pipeline. 
+      Always provide statistically sound interpretations and clearly explain the 
+      assumptions, limitations, and practical significance of your analyses.
+    
+  ml_analyst:
+    name: "MLAnalyst"
+    role: "Machine Learning Specialist"
+    personality: "Innovative and systematic ML expert"
+    system_message: |
+      You are an ML Analyst Agent specialized in machine learning and predictive modeling.
+      
+      Your responsibilities:
+      - Perform automated feature engineering and selection
+      - Train and evaluate machine learning models across different algorithms
+      - Conduct comprehensive model evaluation and comparison
+      - Make predictions using trained models with confidence estimates
+      - Analyze feature importance and model interpretability
+      
+      You work collaboratively with other agents in the data analysis pipeline. 
+      Always follow ML best practices including proper train/validation/test splits, 
+      cross-validation, and addressing overfitting.
+    
+  visualization:
+    name: "VisualizationAgent"
+    role: "Data Visualization Specialist"
+    personality: "Creative and insightful visualization expert"
+    system_message: |
+      You are a Visualization Agent specialized in creating charts, dashboards, and reports.
+      
+      Your responsibilities:
+      - Create statistical plots and exploratory data visualizations
+      - Generate model performance and evaluation visualizations  
+      - Build correlation and relationship visualizations
+      - Create interactive dashboards combining multiple visualizations
+      - Generate comprehensive analysis reports with integrated visualizations
+      
+      You work collaboratively with other agents in the data analysis pipeline. 
+      Always create clear, informative visualizations that effectively communicate 
+      insights and support decision-making.
+    
+  quality_assurance:
+    name: "QualityAssurance"
+    role: "Quality Assurance Specialist"
+    personality: "Meticulous and standards-focused quality expert"
+    system_message: |
+      You are a Quality Assurance Agent specialized in validating results and ensuring accuracy.
+      
+      Your responsibilities:
+      - Validate data quality and integrity with comprehensive checks
+      - Ensure model performance meets standards and benchmarks
+      - Verify statistical test validity and assumption compliance
+      - Conduct end-to-end pipeline audits for compliance
+      - Check consistency and reliability of analysis results
+      
+      You work collaboratively with other agents to maintain high standards of 
+      quality and accuracy. Always apply rigorous validation criteria and provide 
+      clear, actionable feedback for improvement.
+
+# AutoGen-specific configuration
+autogen:
+  # Conversation settings
+  max_consecutive_auto_reply: 10
+  human_input_mode: "NEVER"
+  
+  # Code execution settings
+  code_execution_config:
+    work_dir: "./workspace"
+    use_docker: false
+    timeout: 60
+    last_n_messages: 3
+    
+  # Termination settings
+  termination:
+    max_rounds: 50
+    timeout_seconds: 300
+    
+  # Group chat settings
+  group_chat:
+    max_round: 50
+    admin_name: "DataAnalyst"
+    speaker_selection_method: "auto"
+    allow_repeat_speaker: true
+
+# Agent capabilities and specializations
+agent_capabilities:
+  data_collector:
+    primary_capabilities:
+      - "data-ingestion-file"
+      - "data-ingestion-database" 
+      - "data-ingestion-api"
+      - "data-validation-source"
+    data_sources:
+      - "csv"
+      - "json"
+      - "excel"
+      - "parquet"
+      - "sqlite"
+      - "postgresql"
+      - "mysql"
+      - "rest_api"
+    max_file_size_mb: 500
+    
+  data_cleaner:
+    primary_capabilities:
+      - "data-cleaning-missing-values"
+      - "data-cleaning-outliers"
+      - "data-cleaning-normalization"
+      - "data-quality-assessment"
+      - "data-cleaning-duplicates"
+    cleaning_strategies:
+      - "drop"
+      - "mean"
+      - "median"
+      - "mode"
+      - "knn"
+      - "forward_fill"
+      - "backward_fill"
+    
+  statistical_analyst:
+    primary_capabilities:
+      - "statistical-descriptive-analysis"
+      - "statistical-hypothesis-testing"
+      - "statistical-correlation-analysis"
+      - "statistical-regression-analysis"
+      - "statistical-distribution-testing"
+    statistical_tests:
+      - "ttest_1samp"
+      - "ttest_ind"
+      - "ttest_rel"
+      - "anova"
+      - "chi2"
+      - "mann_whitney"
+      - "wilcoxon"
+    
+  ml_analyst:
+    primary_capabilities:
+      - "ml-feature-engineering"
+      - "ml-model-training"
+      - "ml-model-evaluation"
+      - "ml-prediction"
+      - "ml-feature-importance"
+    algorithms:
+      classification:
+        - "random_forest"
+        - "gradient_boosting"
+        - "logistic_regression"
+        - "svm"
+        - "knn"
+        - "decision_tree"
+        - "naive_bayes"
+      regression:
+        - "random_forest"
+        - "gradient_boosting"
+        - "linear_regression"
+        - "ridge"
+        - "lasso"
+        - "svr"
+        - "knn"
+        - "decision_tree"
+    
+  visualization:
+    primary_capabilities:
+      - "visualization-statistical-plots"
+      - "visualization-model-performance"
+      - "visualization-correlation-analysis"
+      - "visualization-dashboard"
+      - "visualization-report"
+    plot_types:
+      - "histogram"
+      - "boxplot"
+      - "scatter"
+      - "pairplot"
+      - "heatmap"
+      - "violin"
+      - "confusion_matrix"
+      - "roc_curve"
+      - "feature_importance"
+    
+  quality_assurance:
+    primary_capabilities:
+      - "qa-data-validation"
+      - "qa-model-validation"
+      - "qa-statistical-validation"
+      - "qa-pipeline-audit"
+      - "qa-consistency-check"
+    validation_types:
+      - "completeness"
+      - "consistency"
+      - "accuracy"
+      - "uniqueness"
+      - "integrity"
+
+# Inter-agent communication patterns
+communication:
+  # Agent interaction flows
+  workflows:
+    standard_pipeline:
+      - from: "data_collector"
+        to: "data_cleaner"
+        message_type: "dataset_handoff"
+      - from: "data_cleaner"
+        to: ["statistical_analyst", "ml_analyst"]
+        message_type: "cleaned_data_handoff"
+      - from: ["statistical_analyst", "ml_analyst"]
+        to: "visualization"
+        message_type: "analysis_results"
+      - from: "visualization"
+        to: "quality_assurance"
+        message_type: "viz_complete"
+      - from: "quality_assurance"
+        to: "all"
+        message_type: "qa_report"
+    
+    iterative_improvement:
+      - from: "quality_assurance"
+        to: "data_cleaner"
+        message_type: "quality_feedback"
+        condition: "quality_score < threshold"
+      - from: "quality_assurance"
+        to: "ml_analyst"
+        message_type: "model_feedback"
+        condition: "model_performance < threshold"
+  
+  # Message routing preferences
+  routing:
+    data_requests: "data_collector"
+    cleaning_requests: "data_cleaner"
+    statistical_requests: "statistical_analyst"
+    ml_requests: "ml_analyst"
+    visualization_requests: "visualization"
+    validation_requests: "quality_assurance"
+  
+  # Escalation patterns
+  escalation:
+    data_quality_issues:
+      - "data_cleaner"
+      - "quality_assurance"
+    model_performance_issues:
+      - "ml_analyst"
+      - "statistical_analyst"
+      - "quality_assurance"
+    analysis_conflicts:
+      - "quality_assurance"
+
+# Agent memory and context management
+memory:
+  # Context sharing between agents
+  shared_context:
+    - "dataset_metadata"
+    - "analysis_objectives"
+    - "business_context"
+    - "quality_standards"
+    - "performance_metrics"
+  
+  # Agent-specific memory
+  private_context:
+    data_collector:
+      - "data_source_connections"
+      - "ingestion_metadata"
+    data_cleaner:
+      - "cleaning_operations_log"
+      - "quality_metrics"
+    statistical_analyst:
+      - "statistical_test_results"
+      - "assumption_checks"
+    ml_analyst:
+      - "model_training_history"
+      - "feature_engineering_log"
+    visualization:
+      - "visualization_preferences"
+      - "chart_configurations"
+    quality_assurance:
+      - "validation_history"
+      - "audit_findings"
+  
+  # Memory persistence
+  persistence:
+    enabled: true
+    storage_type: "json"
+    cleanup_policy: "age_based"
+    max_age_days: 30
+
+# Performance and resource management
+resources:
+  # Per-agent resource limits
+  memory_limits:
+    data_collector: "2GB"
+    data_cleaner: "4GB"
+    statistical_analyst: "2GB"
+    ml_analyst: "8GB"
+    visualization: "2GB"
+    quality_assurance: "1GB"
+  
+  # Execution timeouts
+  timeouts:
+    data_collection: 300  # 5 minutes
+    data_cleaning: 600    # 10 minutes
+    statistical_analysis: 300  # 5 minutes
+    ml_analysis: 1800     # 30 minutes
+    visualization: 300    # 5 minutes
+    quality_assurance: 300  # 5 minutes
+  
+  # Concurrency settings
+  concurrency:
+    max_parallel_agents: 3
+    allow_concurrent_analysis: true
+    queue_size: 10

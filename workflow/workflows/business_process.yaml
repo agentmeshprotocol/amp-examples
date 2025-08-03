@@ -1,0 +1,251 @@
+---
+id: "business-process-automation"
+name: "Business Process Automation"
+version: "1.0"
+description: "Automated business process workflow with approvals and notifications"
+tags:
+  - "business"
+  - "automation"
+  - "approval"
+
+global_timeout_seconds: 3600
+global_retry_config:
+  strategy: "exponential_backoff"
+  max_attempts: 3
+  initial_delay_seconds: 2.0
+  max_delay_seconds: 30.0
+
+input_schema:
+  type: object
+  properties:
+    request_type:
+      type: string
+      enum: ["expense", "leave", "purchase"]
+    amount:
+      type: number
+      minimum: 0
+    requestor:
+      type: string
+    details:
+      type: object
+  required: ["request_type", "requestor"]
+
+output_schema:
+  type: object
+  properties:
+    status:
+      type: string
+      enum: ["approved", "rejected", "pending"]
+    approval_id:
+      type: string
+    notification_sent:
+      type: boolean
+    final_amount:
+      type: number
+
+tasks:
+  - id: "validate_request"
+    name: "Validate Request"
+    type: "validation"
+    agent_id: "task-executor-1"
+    capability: "task-validation"
+    parameters:
+      data: "{request_data}"
+      rules:
+        - type: "required"
+          field: "request_type"
+          message: "Request type is required"
+        - type: "required"
+          field: "requestor"
+          message: "Requestor is required"
+        - type: "range"
+          field: "amount"
+          config:
+            min: 0
+            max: 100000
+          message: "Amount must be between 0 and 100,000"
+    timeout_seconds: 60
+    outputs: ["validation_result", "validation_errors"]
+    depends_on: []
+
+  - id: "check_authorization"
+    name: "Check Authorization Level"
+    type: "conditional"
+    agent_id: "condition-evaluator"
+    capability: "condition-evaluate"
+    parameters:
+      expression: "amount <= 1000 or requestor in authorized_users"
+      context: "{workflow_context}"
+      condition_type: "python"
+    timeout_seconds: 30
+    outputs: ["authorization_level", "requires_approval"]
+    depends_on: ["validate_request"]
+    condition:
+      expression: "validation_result.valid == True"
+      variables: {}
+      required_outputs: ["validation_result"]
+
+  - id: "auto_approve_small"
+    name: "Auto-approve Small Requests"
+    type: "conditional"
+    agent_id: "task-executor-1"
+    capability: "task-execute"
+    parameters:
+      task_type: "custom"
+      task_config:
+        task_name: "auto_approval"
+        parameters:
+          request_id: "{request_id}"
+          amount: "{amount}"
+          status: "approved"
+    timeout_seconds: 30
+    outputs: ["approval_id", "status"]
+    depends_on: ["check_authorization"]
+    condition:
+      expression: "amount <= 1000 and authorization_level >= 1"
+      variables: {}
+      required_outputs: ["authorization_level"]
+
+  - id: "send_approval_request"
+    name: "Send Approval Request"
+    type: "api_call"
+    agent_id: "task-executor-1"
+    capability: "task-api-call"
+    parameters:
+      method: "POST"
+      url: "https://api.company.com/approvals"
+      headers:
+        Content-Type: "application/json"
+        Authorization: "Bearer {api_token}"
+      data:
+        request_type: "{request_type}"
+        amount: "{amount}"
+        requestor: "{requestor}"
+        details: "{details}"
+        urgency: "normal"
+    timeout_seconds: 120
+    outputs: ["approval_id", "estimated_response_time"]
+    depends_on: ["check_authorization"]
+    condition:
+      expression: "amount > 1000 or authorization_level < 1"
+      variables: {}
+      required_outputs: ["authorization_level"]
+
+  - id: "wait_for_approval"
+    name: "Wait for Approval Response"
+    type: "loop"
+    agent_id: "task-executor-1"
+    capability: "task-execute"
+    parameters:
+      task_type: "api_call"
+      task_config:
+        method: "GET"
+        url: "https://api.company.com/approvals/{approval_id}"
+        headers:
+          Authorization: "Bearer {api_token}"
+        polling_interval: 30
+        max_wait_time: 1800  # 30 minutes
+    timeout_seconds: 1800
+    outputs: ["approval_status", "approver", "approval_comments"]
+    depends_on: ["send_approval_request"]
+    condition:
+      expression: "approval_id is not None"
+      variables: {}
+      required_outputs: ["approval_id"]
+
+  - id: "calculate_final_amount"
+    name: "Calculate Final Amount"
+    type: "data_transform"
+    agent_id: "task-executor-1"
+    capability: "task-data-transform"
+    parameters:
+      input_data:
+        original_amount: "{amount}"
+        approval_status: "{approval_status}"
+        approval_comments: "{approval_comments}"
+      transformations:
+        - type: "custom"
+          config:
+            expression: "original_amount * 0.95 if 'discount' in approval_comments else original_amount"
+      output_format: "json"
+    timeout_seconds: 60
+    outputs: ["final_amount", "discount_applied"]
+    depends_on: ["wait_for_approval", "auto_approve_small"]
+
+  - id: "update_database"
+    name: "Update Request Database"
+    type: "api_call"
+    agent_id: "task-executor-1"
+    capability: "task-api-call"
+    parameters:
+      method: "PUT"
+      url: "https://api.company.com/requests/{request_id}"
+      headers:
+        Content-Type: "application/json"
+        Authorization: "Bearer {api_token}"
+      data:
+        status: "{approval_status}"
+        final_amount: "{final_amount}"
+        processed_at: "{current_timestamp}"
+        processing_notes: "Automated workflow completion"
+    timeout_seconds: 60
+    outputs: ["update_status", "record_id"]
+    depends_on: ["calculate_final_amount"]
+
+  - id: "send_notification"
+    name: "Send Status Notification"
+    type: "parallel"
+    agent_id: "task-executor-1"
+    capability: "task-execute"
+    parameters:
+      task_type: "custom"
+      task_config:
+        task_name: "send_notifications"
+        parameters:
+          notifications:
+            - type: "email"
+              to: "{requestor}"
+              subject: "Request {approval_status}"
+              template: "request_status_update"
+              data:
+                request_type: "{request_type}"
+                status: "{approval_status}"
+                final_amount: "{final_amount}"
+            - type: "slack"
+              channel: "#finance"
+              message: "Request {request_id} has been {approval_status}"
+    timeout_seconds: 120
+    outputs: ["notification_sent", "notification_ids"]
+    depends_on: ["update_database"]
+
+  - id: "generate_report"
+    name: "Generate Processing Report"
+    type: "data_transform"
+    agent_id: "task-executor-1"
+    capability: "task-data-transform"
+    parameters:
+      input_data:
+        request_id: "{request_id}"
+        request_type: "{request_type}"
+        requestor: "{requestor}"
+        original_amount: "{amount}"
+        final_amount: "{final_amount}"
+        status: "{approval_status}"
+        processing_time: "{execution_time}"
+        validation_errors: "{validation_errors}"
+      transformations:
+        - type: "map"
+          config:
+            expression: "{'summary': f'Request {item[\"request_id\"]} processed: {item[\"status\"]}', 'metrics': {'processing_time': item['processing_time'], 'amount_change': item['final_amount'] - item['original_amount']}}"
+      output_format: "json"
+    timeout_seconds: 60
+    outputs: ["report", "summary"]
+    depends_on: ["send_notification"]
+
+metadata:
+  created_by: "workflow-designer"
+  created_at: "2024-01-15T10:00:00Z"
+  last_modified: "2024-01-15T10:00:00Z"
+  version_notes: "Initial business process automation workflow"
+  approval_required: true
+  environment: "production"

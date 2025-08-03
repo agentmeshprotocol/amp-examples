@@ -1,0 +1,338 @@
+# Search Configuration for Research Assistant Network
+
+# Search Sources Configuration
+search_sources:
+  # Primary general search engines
+  primary:
+    duckduckgo:
+      enabled: true
+      priority: 1
+      description: "Privacy-focused search engine with good general results"
+      api_required: false
+      rate_limit: 100  # requests per hour
+      regions: ["us-en", "uk-en", "ca-en", "au-en"]
+      time_ranges: ["1d", "1w", "1m", "1y", "all"]
+      
+    google_custom_search:
+      enabled: false  # Requires API setup
+      priority: 2
+      description: "Google Custom Search Engine API"
+      api_required: true
+      rate_limit: 100  # requests per day with free tier
+      api_key_env: "GOOGLE_API_KEY"
+      cse_id_env: "GOOGLE_CSE_ID"
+      
+    serper:
+      enabled: false  # Requires API key
+      priority: 3
+      description: "Serper.dev Google Search API"
+      api_required: true
+      rate_limit: 1000  # requests per month with free tier
+      api_key_env: "SERPER_API_KEY"
+
+  # Specialized search sources
+  specialized:
+    news:
+      news_api:
+        enabled: false  # Requires API key
+        description: "News API for current news articles"
+        api_required: true
+        api_key_env: "NEWS_API_KEY"
+        rate_limit: 500  # requests per day with free tier
+        languages: ["en", "es", "fr", "de"]
+        categories: ["business", "entertainment", "general", "health", "science", "sports", "technology"]
+        sort_options: ["relevancy", "popularity", "publishedAt"]
+        
+    academic:
+      arxiv:
+        enabled: true
+        description: "arXiv preprint repository"
+        api_required: false
+        base_url: "http://export.arxiv.org/api/query"
+        rate_limit: 120  # requests per minute
+        categories: ["cs", "eess", "econ", "math", "physics", "q-bio", "q-fin", "stat"]
+        sort_options: ["relevance", "lastUpdatedDate", "submittedDate"]
+        
+      pubmed:
+        enabled: true
+        description: "PubMed medical literature database"
+        api_required: false
+        base_url: "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
+        rate_limit: 180  # requests per minute
+        databases: ["pubmed", "pmc", "books"]
+        
+      semantic_scholar:
+        enabled: false  # Optional API key for higher limits
+        description: "Semantic Scholar academic search"
+        api_required: false
+        base_url: "https://api.semanticscholar.org"
+        rate_limit: 100  # requests per 5 minutes without API key
+        api_key_env: "SEMANTIC_SCHOLAR_API_KEY"
+        
+    government:
+      usa_gov:
+        enabled: true
+        description: "US Government search"
+        site_search: "site:*.gov"
+        
+      who_int:
+        enabled: true
+        description: "World Health Organization"
+        site_search: "site:who.int"
+        
+    fact_checking:
+      snopes:
+        enabled: true
+        description: "Snopes fact-checking"
+        site_search: "site:snopes.com"
+        
+      factcheck_org:
+        enabled: true
+        description: "FactCheck.org"
+        site_search: "site:factcheck.org"
+        
+      politifact:
+        enabled: true
+        description: "PolitiFact"
+        site_search: "site:politifact.com"
+
+# Search Parameters
+search_parameters:
+  # Result limits
+  max_results_per_source: 10
+  max_total_results: 50
+  max_results_academic: 15
+  max_results_news: 20
+  
+  # Search depth and coverage
+  search_depth: 3  # Number of search iterations
+  query_variations: 3  # Number of query reformulations
+  
+  # Language and region
+  default_language: "en"
+  supported_languages: ["en", "es", "fr", "de", "pt"]
+  default_region: "us"
+  
+  # Time constraints
+  default_time_range: "1y"  # Last year
+  time_ranges:
+    recent: "1w"
+    current: "1m"
+    standard: "1y"
+    comprehensive: "all"
+    
+  # Quality filters
+  min_content_length: 100  # Minimum words
+  max_content_age_days: 365
+  credibility_threshold: 0.6
+  relevance_threshold: 0.3
+
+# Content Filtering
+content_filters:
+  # Quality thresholds
+  min_word_count: 100
+  max_word_count: 50000
+  min_sentence_count: 5
+  max_age_days: 365
+  
+  # Credibility scoring
+  credibility_threshold: 0.5
+  domain_whitelist: []  # Empty means no restriction
+  domain_blacklist:
+    - "spam-site.com"
+    - "fake-news.org"
+    - "clickbait.net"
+    
+  # Content type filters
+  allowed_content_types:
+    - "text/html"
+    - "application/pdf"
+    - "text/plain"
+    
+  excluded_file_types:
+    - ".exe"
+    - ".zip"
+    - ".rar"
+    - ".dmg"
+    
+  # Language detection
+  language_detection:
+    enabled: true
+    confidence_threshold: 0.8
+    fallback_language: "en"
+
+# Search Optimization
+optimization:
+  # Query enhancement
+  query_expansion:
+    enabled: true
+    max_synonyms: 3
+    use_stemming: true
+    use_lemmatization: true
+    
+  # Duplicate detection
+  deduplication:
+    enabled: true
+    similarity_threshold: 0.85
+    use_url_normalization: true
+    use_content_hashing: true
+    
+  # Caching
+  caching:
+    enabled: true
+    cache_ttl_hours: 24
+    max_cache_size_mb: 100
+    cache_search_results: true
+    cache_content_extraction: true
+    
+  # Performance
+  performance:
+    max_concurrent_requests: 5
+    request_timeout: 30
+    retry_attempts: 3
+    retry_delay: 1.0
+    use_connection_pooling: true
+
+# Domain Credibility Scoring
+domain_credibility:
+  # High credibility sources (0.8-1.0)
+  high_credibility:
+    academic:
+      - domain: "nature.com"
+        score: 0.95
+        type: "academic_journal"
+      - domain: "science.org"
+        score: 0.95
+        type: "academic_journal"
+      - domain: "pubmed.ncbi.nlm.nih.gov"
+        score: 0.98
+        type: "academic_database"
+      - domain: "arxiv.org"
+        score: 0.92
+        type: "preprint_repository"
+        
+    news:
+      - domain: "reuters.com"
+        score: 0.95
+        type: "news_agency"
+      - domain: "ap.org"
+        score: 0.95
+        type: "news_agency"
+      - domain: "bbc.com"
+        score: 0.90
+        type: "news_outlet"
+      - domain: "npr.org"
+        score: 0.88
+        type: "news_outlet"
+        
+    government:
+      - domain: "cdc.gov"
+        score: 0.92
+        type: "government_health"
+      - domain: "who.int"
+        score: 0.90
+        type: "international_org"
+      - domain: "fda.gov"
+        score: 0.90
+        type: "government_regulatory"
+        
+  # Medium credibility sources (0.6-0.8)
+  medium_credibility:
+    - domain: "wikipedia.org"
+      score: 0.75
+      type: "encyclopedia"
+    - domain: "britannica.com"
+      score: 0.88
+      type: "encyclopedia"
+    - domain: "nytimes.com"
+      score: 0.82
+      type: "news_outlet"
+    - domain: "washingtonpost.com"
+      score: 0.82
+      type: "news_outlet"
+      
+  # Domain scoring rules
+  scoring_rules:
+    government_domains:
+      pattern: "*.gov"
+      base_score: 0.85
+      
+    education_domains:
+      pattern: "*.edu"
+      base_score: 0.80
+      
+    organization_domains:
+      pattern: "*.org"
+      base_score: 0.60
+      
+    commercial_domains:
+      pattern: "*.com"
+      base_score: 0.50
+
+# Search Query Templates
+query_templates:
+  # Basic research queries
+  general_research:
+    - "{topic} research findings"
+    - "{topic} recent studies"
+    - "{topic} latest developments"
+    - "{topic} expert analysis"
+    
+  # Fact-checking queries
+  fact_checking:
+    - '"{claim}" fact check'
+    - '"{claim}" verification'
+    - '"{claim}" true false'
+    - '"{claim}" debunked confirmed'
+    
+  # Academic queries
+  academic:
+    - "{topic} peer reviewed study"
+    - "{topic} research paper"
+    - "{topic} scientific evidence"
+    - "{topic} meta analysis"
+    
+  # News queries
+  news:
+    - "{topic} news {time_range}"
+    - "{topic} latest news"
+    - "{topic} breaking news"
+    - "{topic} recent developments"
+    
+  # Statistical queries
+  statistical:
+    - "{topic} statistics data"
+    - "{topic} survey results"
+    - "{topic} quantitative analysis"
+    - "{topic} empirical evidence"
+
+# Error Handling
+error_handling:
+  # Retry configuration
+  retry:
+    max_attempts: 3
+    base_delay: 1.0
+    max_delay: 30.0
+    exponential_backoff: true
+    
+  # Timeout handling
+  timeouts:
+    search_request: 30
+    content_extraction: 15
+    total_workflow: 300
+    
+  # Fallback strategies
+  fallbacks:
+    - strategy: "alternative_source"
+      description: "Try different search source"
+    - strategy: "query_simplification"
+      description: "Simplify search query"
+    - strategy: "broader_search"
+      description: "Expand search scope"
+      
+  # Error logging
+  logging:
+    log_failed_requests: true
+    log_slow_requests: true
+    slow_request_threshold: 10.0
+    include_stack_traces: false

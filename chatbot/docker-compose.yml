@@ -1,0 +1,218 @@
+# Docker Compose configuration for Multi-Agent Chatbot System
+version: '3.8'
+
+services:
+  # AMP Registry Service (placeholder - would be a real registry in production)
+  amp-registry:
+    image: nginx:alpine
+    ports:
+      - "8000:80"
+    volumes:
+      - ./docker/registry-config.json:/usr/share/nginx/html/registry.json
+    networks:
+      - amp-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/registry.json"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Conversation Manager
+  conversation-manager:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.agent
+      args:
+        AGENT_TYPE: conversation-manager
+    environment:
+      - AGENT_ID=conversation-manager
+      - AMP_REGISTRY_URL=http://amp-registry
+      - LOG_LEVEL=INFO
+    depends_on:
+      - amp-registry
+    networks:
+      - amp-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8001/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Router Agent
+  router-agent:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.agent
+      args:
+        AGENT_TYPE: router-agent
+    environment:
+      - AGENT_ID=router-agent
+      - AMP_REGISTRY_URL=http://amp-registry
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LOG_LEVEL=INFO
+    depends_on:
+      - amp-registry
+      - conversation-manager
+    networks:
+      - amp-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8002/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # FAQ Agent
+  faq-agent:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.agent
+      args:
+        AGENT_TYPE: faq-agent
+    environment:
+      - AGENT_ID=faq-agent
+      - AMP_REGISTRY_URL=http://amp-registry
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LOG_LEVEL=INFO
+    depends_on:
+      - amp-registry
+      - conversation-manager
+    networks:
+      - amp-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8003/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Sales Agent
+  sales-agent:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.agent
+      args:
+        AGENT_TYPE: sales-agent
+    environment:
+      - AGENT_ID=sales-agent
+      - AMP_REGISTRY_URL=http://amp-registry
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LOG_LEVEL=INFO
+    depends_on:
+      - amp-registry
+      - conversation-manager
+    networks:
+      - amp-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8004/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Tech Support Agent
+  tech-support-agent:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.agent
+      args:
+        AGENT_TYPE: tech-support-agent
+    environment:
+      - AGENT_ID=tech-support-agent
+      - AMP_REGISTRY_URL=http://amp-registry
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LOG_LEVEL=INFO
+    depends_on:
+      - amp-registry
+      - conversation-manager
+    networks:
+      - amp-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8005/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Web Interface
+  web-interface:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+    ports:
+      - "8080:8080"
+    environment:
+      - AMP_REGISTRY_URL=http://amp-registry
+      - LOG_LEVEL=INFO
+    depends_on:
+      - router-agent
+      - faq-agent
+      - sales-agent
+      - tech-support-agent
+    networks:
+      - amp-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis for session storage (optional)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - amp-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Monitoring with Prometheus (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+    networks:
+      - amp-network
+    profiles:
+      - monitoring
+
+  # Grafana for dashboards (optional)
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./docker/grafana/dashboards:/var/lib/grafana/dashboards
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning
+    networks:
+      - amp-network
+    profiles:
+      - monitoring
+
+networks:
+  amp-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+  prometheus-data:
+  grafana-data:
+
+# Environment variables configuration
+# Create a .env file with the following variables:
+# OPENAI_API_KEY=your_openai_api_key_here
+# LOG_LEVEL=INFO
+# AMP_REGISTRY_URL=http://amp-registry

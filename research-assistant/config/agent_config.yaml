@@ -1,0 +1,262 @@
+# Individual Agent Configuration for Research Assistant Network
+
+# Web Search Agent Configuration
+web_search_agent:
+  name: "Web Search Agent"
+  description: "Specialized agent for web search and content discovery"
+  
+  # Search configuration
+  search:
+    max_results_per_source: 10
+    default_timeout: 30
+    min_word_count: 100
+    max_age_days: 365
+    credibility_threshold: 0.6
+    
+    # Search sources
+    sources:
+      duckduckgo:
+        enabled: true
+        region: "us-en"
+        safesearch: "moderate"
+        time_ranges: ["1d", "1w", "1m", "1y"]
+        
+      google:
+        enabled: false  # Requires API key
+        api_key: ""  # Set via environment variable
+        custom_search_engine_id: ""
+        
+      serper:
+        enabled: false  # Requires API key
+        api_key: ""  # Set via environment variable
+        
+      news_api:
+        enabled: false  # Requires API key
+        api_key: ""  # Set via environment variable
+        
+      academic:
+        arxiv:
+          enabled: true
+          max_results: 5
+        pubmed:
+          enabled: true
+          max_results: 5
+          
+  # Content extraction
+  extraction:
+    methods: ["newspaper", "beautifulsoup"]
+    timeout: 15
+    max_retries: 2
+    cache_enabled: true
+    cache_size: 100
+    
+  # Quality filtering
+  quality:
+    min_credibility_score: 0.3
+    min_relevance_score: 0.2
+    duplicate_threshold: 0.9
+
+# Content Analyzer Agent Configuration
+content_analyzer:
+  name: "Content Analyzer Agent"
+  description: "Advanced content analysis and information extraction"
+  
+  # Analysis configuration
+  analysis:
+    max_summary_length: 500
+    max_key_points: 10
+    min_keyword_score: 0.1
+    analysis_depths: ["basic", "standard", "comprehensive"]
+    
+  # NLP models
+  models:
+    spacy_model: "en_core_web_sm"
+    summarization_model: "facebook/bart-large-cnn"
+    sentence_transformer: "all-MiniLM-L6-v2"
+    use_gpu: false
+    
+  # Processing limits
+  limits:
+    max_content_length: 1000000  # 1MB
+    max_concurrent_analyses: 3
+    cache_size: 50
+    
+  # Feature toggles
+  features:
+    sentiment_analysis: true
+    entity_extraction: true
+    keyword_extraction: true
+    bias_detection: true
+    factual_claim_extraction: true
+    readability_scoring: true
+
+# Fact Checker Agent Configuration
+fact_checker:
+  name: "Fact Checker Agent"
+  description: "Comprehensive fact verification and source validation"
+  
+  # Verification settings
+  verification:
+    min_sources_for_verification: 2
+    max_search_results: 10
+    verification_timeout: 30
+    confidence_threshold: 0.5
+    
+  # Source credibility database
+  credible_sources:
+    high_credibility:
+      - "reuters.com"
+      - "ap.org"
+      - "bbc.com"
+      - "npr.org"
+      - "pubmed.ncbi.nlm.nih.gov"
+      - "nature.com"
+      - "science.org"
+      
+    government_sources:
+      - "cdc.gov"
+      - "who.int"
+      - "fda.gov"
+      - "nih.gov"
+      
+    academic_sources:
+      - "arxiv.org"
+      - "ieee.org"
+      - "acm.org"
+      
+    fact_check_sources:
+      - "snopes.com"
+      - "factcheck.org"
+      - "politifact.com"
+      
+  # Verification methods
+  methods:
+    cross_reference: true
+    source_triangulation: true
+    expert_consensus: true
+    temporal_consistency: true
+    
+  # Bias detection
+  bias_detection:
+    emotional_language_threshold: 3
+    opinion_indicator_threshold: 2
+    absolute_statement_threshold: 3
+
+# Synthesis Agent Configuration
+synthesis_agent:
+  name: "Synthesis Agent"
+  description: "Content synthesis and report generation"
+  
+  # Synthesis settings
+  synthesis:
+    default_target_length: 1500
+    min_sources_per_section: 2
+    max_sections: 8
+    quality_threshold: 0.6
+    
+  # Report formats
+  formats:
+    academic:
+      sections: ["introduction", "methodology", "findings", "discussion", "conclusion"]
+      citation_style: "apa"
+      tone: "formal"
+      
+    journalistic:
+      sections: ["lead", "background", "key_findings", "implications", "expert_opinions"]
+      citation_style: "news"
+      tone: "accessible"
+      
+    executive_summary:
+      sections: ["overview", "key_insights", "recommendations", "next_steps"]
+      citation_style: "minimal"
+      tone: "business"
+      
+    technical_report:
+      sections: ["abstract", "introduction", "technical_details", "analysis", "conclusions"]
+      citation_style: "ieee"
+      tone: "technical"
+      
+  # Content generation
+  generation:
+    text_generation_model: "gpt2-medium"
+    max_chunk_length: 1024
+    temperature: 0.3
+    enable_ai_generation: true
+    fallback_to_manual: true
+    
+  # Citation management
+  citations:
+    styles: ["apa", "mla", "chicago", "ieee"]
+    auto_format: true
+    validate_urls: true
+    include_access_dates: true
+
+# Research Orchestrator Configuration
+research_orchestrator:
+  name: "Research Orchestrator"
+  description: "Coordinates research workflows across multiple agents"
+  
+  # Workflow management
+  workflow:
+    max_concurrent_research: 3
+    default_timeout: 1800  # 30 minutes
+    progress_update_interval: 30  # seconds
+    
+  # Quality control
+  quality_control:
+    min_credibility_threshold: 0.6
+    min_sources_required: 3
+    max_fact_check_claims: 10
+    synthesis_quality_threshold: 0.7
+    
+  # Performance optimization
+  optimization:
+    enable_parallel_processing: true
+    cache_intermediate_results: true
+    prioritize_high_credibility: true
+    adaptive_timeout: true
+
+# Global Agent Settings
+global_agent_settings:
+  # AMP integration
+  amp:
+    endpoint: "http://localhost:8000"
+    timeout: 30
+    retry_attempts: 3
+    heartbeat_interval: 60
+    
+  # Logging
+  logging:
+    level: "INFO"
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    file: "logs/agent.log"
+    max_file_size: "10MB"
+    backup_count: 5
+    
+  # Error handling
+  error_handling:
+    max_retries: 3
+    retry_delay: 1.0
+    circuit_breaker_threshold: 5
+    circuit_breaker_timeout: 300
+    
+  # Resource management
+  resources:
+    max_memory_mb: 1024
+    max_cpu_percent: 50
+    max_disk_mb: 500
+    cleanup_interval: 3600  # 1 hour
+    
+  # Security
+  security:
+    rate_limit_per_hour: 1000
+    max_request_size_mb: 10
+    allowed_domains: []  # Empty means all allowed
+    blocked_domains: ["malware.com", "spam.site"]
+    
+  # Monitoring
+  monitoring:
+    enable_metrics: true
+    metrics_interval: 60
+    health_check_interval: 300
+    performance_logging: true

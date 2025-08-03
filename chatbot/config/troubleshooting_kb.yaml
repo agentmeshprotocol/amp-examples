@@ -1,0 +1,284 @@
+# Troubleshooting Knowledge Base for Technical Support
+
+issues:
+  - category: "login_issues"
+    title: "Login and Authentication Problems"
+    description: "Issues related to user authentication and account access"
+    keywords: ["login", "sign in", "password", "authentication", "access", "account", "username"]
+    common_causes:
+      - "Incorrect username or password"
+      - "Account locked due to multiple failed attempts"
+      - "Password expired or needs reset"
+      - "Browser cache and cookies issues"
+      - "Two-factor authentication problems"
+      - "Account suspended or deactivated"
+    symptoms:
+      - "Login page not loading"
+      - "Invalid credentials error"
+      - "Account locked message"
+      - "Redirect loops after login"
+      - "Two-factor code not working"
+    solutions:
+      - "Verify username and password are correct"
+      - "Clear browser cache and cookies"
+      - "Try logging in with incognito/private mode"
+      - "Reset password using forgot password link"
+      - "Check if account is locked and contact support"
+      - "Verify two-factor authentication setup"
+      - "Try a different browser or device"
+    escalation_triggers:
+      - "Account security concerns"
+      - "Multiple failed reset attempts"
+      - "Suspected unauthorized access"
+      - "Two-factor authentication device lost"
+    severity_indicators:
+      - "high": ["security", "breach", "unauthorized"]
+      - "medium": ["locked", "reset", "expired"]
+      - "low": ["forgot", "cache", "browser"]
+    estimated_resolution: "15-30 minutes"
+    
+  - category: "performance_issues" 
+    title: "Application Performance Problems"
+    description: "Slow loading, timeouts, and performance-related issues"
+    keywords: ["slow", "lag", "performance", "timeout", "loading", "speed", "delay", "freeze"]
+    common_causes:
+      - "Poor internet connection"
+      - "Server overload or maintenance"
+      - "Browser performance issues"
+      - "Large dataset or file processing"
+      - "Outdated browser or plugins"
+      - "Third-party service delays"
+    symptoms:
+      - "Pages loading slowly"
+      - "Timeout errors"
+      - "Application freezing"
+      - "Long processing times"
+      - "Delayed responses"
+    solutions:
+      - "Check internet connection speed"
+      - "Try a different browser or device"
+      - "Clear browser cache and temporary files"
+      - "Close unnecessary browser tabs and applications"
+      - "Update browser to latest version"
+      - "Disable browser extensions temporarily"
+      - "Try accessing during off-peak hours"
+    escalation_triggers:
+      - "System-wide performance degradation"
+      - "Database performance issues"
+      - "Server capacity problems"
+      - "Multiple users reporting same issue"
+    severity_indicators:
+      - "critical": ["outage", "down", "unavailable"]
+      - "high": ["very slow", "timeout", "freeze"]
+      - "medium": ["slow", "delay", "lag"]
+      - "low": ["minor delay", "occasional slow"]
+    estimated_resolution: "30-60 minutes"
+    
+  - category: "functionality_errors"
+    title: "Feature and Functionality Errors"
+    description: "Application features not working as expected"
+    keywords: ["error", "bug", "not working", "broken", "crash", "malfunction", "failed"]
+    common_causes:
+      - "Software bug or defect"
+      - "Browser compatibility issues"
+      - "Data corruption or validation errors"
+      - "Configuration problems"
+      - "Recent system updates"
+      - "User permission issues"
+    symptoms:
+      - "Error messages appearing"
+      - "Features not responding"
+      - "Unexpected behavior"
+      - "Data not saving"
+      - "Functions returning wrong results"
+    solutions:
+      - "Refresh the page and try again"
+      - "Try the same action in a different browser"
+      - "Clear browser data and restart"
+      - "Check if the issue is reproducible"
+      - "Document exact steps that cause the error"
+      - "Try the feature with different data"
+      - "Report the specific error message to support"
+    escalation_triggers:
+      - "Data loss or corruption"
+      - "System crashes"
+      - "Security-related errors"
+      - "Critical business function affected"
+    severity_indicators:
+      - "critical": ["data loss", "corruption", "crash", "security"]
+      - "high": ["business critical", "blocking", "urgent"]
+      - "medium": ["workaround available", "minor impact"]
+      - "low": ["cosmetic", "enhancement", "nice to have"]
+    estimated_resolution: "1-4 hours"
+    
+  - category: "integration_issues"
+    title: "Third-party Integration Problems"
+    description: "Issues with API connections and external service integrations"
+    keywords: ["integration", "api", "sync", "connection", "third-party", "external", "webhook"]
+    common_causes:
+      - "API authentication failures"
+      - "API rate limiting"
+      - "Service configuration changes"
+      - "Network connectivity issues"
+      - "API version incompatibilities"
+      - "Service outages"
+    symptoms:
+      - "Sync errors or failures"
+      - "Data not updating"
+      - "Connection timeouts"
+      - "Authentication errors"
+      - "Missing or duplicate data"
+    solutions:
+      - "Check API credentials and permissions"
+      - "Verify integration settings and configuration"
+      - "Test API connectivity manually"
+      - "Review rate limits and usage"
+      - "Check third-party service status"
+      - "Re-authenticate or refresh tokens"
+      - "Contact third-party support if needed"
+    escalation_triggers:
+      - "API security issues"
+      - "Data synchronization failures"
+      - "Multiple integration failures"
+      - "Business-critical integration down"
+    severity_indicators:
+      - "critical": ["business critical", "data loss", "security"]
+      - "high": ["sync failure", "authentication", "outage"]
+      - "medium": ["partial sync", "delayed", "warnings"]
+      - "low": ["minor delay", "cosmetic", "informational"]
+    estimated_resolution: "2-6 hours"
+    
+  - category: "data_issues"
+    title: "Data and File Problems"
+    description: "Issues with data access, corruption, or file handling"
+    keywords: ["data", "file", "upload", "download", "missing", "corrupted", "lost"]
+    common_causes:
+      - "File format incompatibility"
+      - "Data corruption during transfer"
+      - "Storage quota exceeded"
+      - "Permission restrictions"
+      - "Large file size limitations"
+      - "Network interruptions during transfer"
+    symptoms:
+      - "Files not uploading"
+      - "Data missing or incomplete"
+      - "Download failures"
+      - "File corruption errors"
+      - "Access denied messages"
+    solutions:
+      - "Check file format and size restrictions"
+      - "Verify available storage space"
+      - "Try uploading/downloading smaller files"
+      - "Check file permissions and access rights"
+      - "Use a stable internet connection"
+      - "Try different browsers or devices"
+      - "Contact support for data recovery if needed"
+    escalation_triggers:
+      - "Data loss or permanent corruption"
+      - "Backup system failures"
+      - "Multiple file corruption reports"
+      - "Storage system issues"
+    severity_indicators:
+      - "critical": ["data loss", "corruption", "permanent"]
+      - "high": ["important data", "business impact"]
+      - "medium": ["recoverable", "backup available"]
+      - "low": ["minor files", "easily replaceable"]
+    estimated_resolution: "1-8 hours"
+    
+  - category: "mobile_issues"
+    title: "Mobile App Problems"
+    description: "Issues specific to mobile applications"
+    keywords: ["mobile", "app", "ios", "android", "phone", "tablet", "device"]
+    common_causes:
+      - "Outdated app version"
+      - "Device compatibility issues"
+      - "Network connectivity problems"
+      - "Device storage limitations"
+      - "Operating system incompatibility"
+      - "App permissions not granted"
+    symptoms:
+      - "App crashing or freezing"
+      - "Features not working on mobile"
+      - "Sync issues between devices"
+      - "Push notifications not working"
+      - "App won't start or load"
+    solutions:
+      - "Update app to latest version"
+      - "Restart the mobile device"
+      - "Check available device storage"
+      - "Verify app permissions in device settings"
+      - "Check network connection"
+      - "Reinstall the app if necessary"
+      - "Clear app cache and data"
+    escalation_triggers:
+      - "App store review issues"
+      - "Widespread mobile platform problems"
+      - "Device-specific critical bugs"
+      - "Security vulnerabilities"
+    severity_indicators:
+      - "critical": ["security", "crash", "unusable"]
+      - "high": ["frequent crash", "major feature broken"]
+      - "medium": ["minor issues", "workaround available"]
+      - "low": ["cosmetic", "convenience features"]
+    estimated_resolution: "30 minutes - 2 hours"
+
+# Escalation matrix
+escalation_matrix:
+  level_1:
+    title: "First Level Support"
+    agents: ["tech-support-agent"]
+    capabilities: ["basic troubleshooting", "account issues", "password resets"]
+    escalation_threshold: 30  # minutes
+    
+  level_2:
+    title: "Senior Technical Support"
+    agents: ["senior-tech-support"]
+    capabilities: ["complex troubleshooting", "integration issues", "data recovery"]
+    escalation_threshold: 120  # minutes
+    
+  level_3:
+    title: "Engineering Team"
+    agents: ["engineering-team"]
+    capabilities: ["bug fixes", "system issues", "architecture problems"]
+    escalation_threshold: 480  # minutes (8 hours)
+    
+  level_4:
+    title: "Emergency Response"
+    agents: ["emergency-response"]
+    capabilities: ["critical outages", "security incidents", "data loss"]
+    escalation_threshold: 0  # immediate
+
+# Auto-escalation rules
+auto_escalation:
+  keywords:
+    critical: ["security", "breach", "hack", "data loss", "corruption", "outage", "down"]
+    high: ["urgent", "important", "broken", "crash", "critical business"]
+    immediate: ["emergency", "production down", "can't work", "losing money"]
+    
+  conditions:
+    multiple_attempts: 3
+    unresolved_time_hours: 24
+    customer_vip: true
+    business_hours_only: false
+
+# Resolution tracking
+resolution_tracking:
+  success_indicators:
+    - "Customer confirms issue resolved"
+    - "No follow-up within 24 hours"
+    - "Positive feedback received"
+    - "System monitoring shows normal operation"
+    
+  follow_up_schedule:
+    immediate: "1 hour after resolution"
+    short_term: "24 hours after resolution"
+    long_term: "1 week after resolution"
+    
+# Knowledge base maintenance
+maintenance:
+  review_frequency: "monthly"
+  update_triggers:
+    - "New product features"
+    - "Common issues emerging"
+    - "Customer feedback patterns"
+    - "Resolution time improvements"

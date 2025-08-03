@@ -1,0 +1,61 @@
+# Dockerfile for AMP Workflow Agents
+FROM python:3.11-slim
+
+LABEL maintainer="AMP Team"
+LABEL description="AMP Workflow Orchestration Agent"
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV AGENT_TYPE=""
+ENV AGENT_PORT=8080
+
+# Create app user
+RUN useradd --create-home --shell /bin/bash app
+
+# Set work directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    sqlite3 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first for better caching
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY . .
+
+# Copy shared libraries
+COPY ../shared-lib ./shared-lib
+
+# Create necessary directories
+RUN mkdir -p /app/logs /app/data /app/temp /app/uploads
+
+# Set ownership
+RUN chown -R app:app /app
+
+# Switch to app user
+USER app
+
+# Health check script
+COPY docker/health_check.py .
+RUN chmod +x health_check.py
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python health_check.py
+
+# Expose port
+EXPOSE ${AGENT_PORT}
+
+# Entry point script
+COPY docker/entrypoint.sh .
+RUN chmod +x entrypoint.sh
+
+ENTRYPOINT ["./entrypoint.sh"]

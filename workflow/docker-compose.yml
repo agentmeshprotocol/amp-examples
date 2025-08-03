@@ -1,0 +1,283 @@
+version: '3.8'
+
+services:
+  # Infrastructure Services
+  redis:
+    image: redis:7-alpine
+    container_name: amp-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - amp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # State Manager
+  state-manager:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.agent
+    container_name: amp-state-manager
+    environment:
+      - AGENT_TYPE=state-manager
+      - AGENT_PORT=8082
+      - REDIS_URL=redis://redis:6379
+    ports:
+      - "8082:8082"
+    volumes:
+      - ./config:/app/config:ro
+      - ./data:/app/data
+      - state_data:/app/data/sqlite
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - amp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Condition Evaluator
+  condition-evaluator:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.agent
+    container_name: amp-condition-evaluator
+    environment:
+      - AGENT_TYPE=condition-evaluator
+      - AGENT_PORT=8083
+    ports:
+      - "8083:8083"
+    volumes:
+      - ./config:/app/config:ro
+    networks:
+      - amp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Error Handler
+  error-handler:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.agent
+    container_name: amp-error-handler
+    environment:
+      - AGENT_TYPE=error-handler
+      - AGENT_PORT=8084
+    ports:
+      - "8084:8084"
+    volumes:
+      - ./config:/app/config:ro
+      - ./logs:/app/logs
+    networks:
+      - amp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Monitor Agent
+  monitor-agent:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.agent
+    container_name: amp-monitor-agent
+    environment:
+      - AGENT_TYPE=monitor-agent
+      - AGENT_PORT=8085
+    ports:
+      - "8085:8085"
+    volumes:
+      - ./config:/app/config:ro
+      - ./logs:/app/logs
+      - monitor_data:/app/data
+    networks:
+      - amp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Workflow Engine
+  workflow-engine:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.agent
+    container_name: amp-workflow-engine
+    environment:
+      - AGENT_TYPE=workflow-engine
+      - AGENT_PORT=8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config:/app/config:ro
+      - ./workflows:/app/workflows:ro
+      - ./logs:/app/logs
+    depends_on:
+      state-manager:
+        condition: service_healthy
+      condition-evaluator:
+        condition: service_healthy
+      error-handler:
+        condition: service_healthy
+      monitor-agent:
+        condition: service_healthy
+    networks:
+      - amp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Task Executor (can be scaled)
+  task-executor:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.agent
+    environment:
+      - AGENT_TYPE=task-executor
+      - AGENT_PORT=8081
+    ports:
+      - "8081-8083:8081"  # Port range for scaling
+    volumes:
+      - ./config:/app/config:ro
+      - ./temp:/app/temp
+      - ./logs:/app/logs
+    depends_on:
+      workflow-engine:
+        condition: service_healthy
+    networks:
+      - amp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      replicas: 2  # Default to 2 task executors
+
+  # Web Dashboard
+  web-dashboard:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+    container_name: amp-web-dashboard
+    environment:
+      - DASHBOARD_PORT=8090
+      - WORKFLOW_ENGINE_URL=http://workflow-engine:8080
+      - MONITOR_AGENT_URL=http://monitor-agent:8085
+      - STATE_MANAGER_URL=http://state-manager:8082
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./config:/app/config:ro
+      - ./web/uploads:/app/uploads
+    depends_on:
+      workflow-engine:
+        condition: service_healthy
+      monitor-agent:
+        condition: service_healthy
+    networks:
+      - amp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Optional: Prometheus for metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: amp-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - amp-network
+    restart: unless-stopped
+    profiles:
+      - monitoring
+
+  # Optional: Grafana for metrics visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: amp-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      - prometheus
+    networks:
+      - amp-network
+    restart: unless-stopped
+    profiles:
+      - monitoring
+
+  # Optional: Jaeger for distributed tracing
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: amp-jaeger
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - amp-network
+    restart: unless-stopped
+    profiles:
+      - tracing
+
+networks:
+  amp-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  redis_data:
+    driver: local
+  state_data:
+    driver: local
+  monitor_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local

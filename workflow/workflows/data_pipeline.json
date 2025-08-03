@@ -1,0 +1,385 @@
+{
+  "id": "data-processing-pipeline",
+  "name": "Data Processing Pipeline",
+  "version": "2.1",
+  "description": "Comprehensive data ingestion, transformation, and analysis pipeline",
+  "tags": ["data", "etl", "analytics", "pipeline"],
+  "global_timeout_seconds": 7200,
+  "global_retry_config": {
+    "strategy": "linear_backoff",
+    "max_attempts": 5,
+    "initial_delay_seconds": 1.0,
+    "max_delay_seconds": 60.0,
+    "backoff_multiplier": 1.5
+  },
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "data_source": {
+        "type": "string",
+        "enum": ["api", "file", "database", "stream"]
+      },
+      "source_config": {
+        "type": "object"
+      },
+      "processing_options": {
+        "type": "object",
+        "properties": {
+          "validate_schema": {"type": "boolean", "default": true},
+          "remove_duplicates": {"type": "boolean", "default": true},
+          "apply_transformations": {"type": "boolean", "default": true}
+        }
+      },
+      "output_targets": {
+        "type": "array",
+        "items": {"type": "string"}
+      }
+    },
+    "required": ["data_source", "source_config"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "records_processed": {"type": "integer"},
+      "records_valid": {"type": "integer"},
+      "records_invalid": {"type": "integer"},
+      "output_locations": {"type": "array"},
+      "processing_summary": {"type": "object"}
+    }
+  },
+  "tasks": [
+    {
+      "id": "data_ingestion",
+      "name": "Data Ingestion",
+      "type": "api_call",
+      "agent_id": "task-executor-1",
+      "capability": "task-api-call",
+      "parameters": {
+        "method": "GET",
+        "url": "{source_config.url}",
+        "headers": {
+          "Authorization": "Bearer {source_config.api_key}",
+          "Content-Type": "application/json"
+        },
+        "timeout": 300,
+        "retry_count": 3
+      },
+      "timeout_seconds": 600,
+      "outputs": ["raw_data", "ingestion_metadata", "record_count"],
+      "depends_on": [],
+      "retry_config": {
+        "strategy": "exponential_backoff",
+        "max_attempts": 5,
+        "initial_delay_seconds": 2.0,
+        "retry_on_codes": ["TIMEOUT", "NETWORK_ERROR", "RATE_LIMIT_EXCEEDED"]
+      }
+    },
+    {
+      "id": "data_validation",
+      "name": "Schema Validation",
+      "type": "validation",
+      "agent_id": "task-executor-1",
+      "capability": "task-validation",
+      "parameters": {
+        "data": "{raw_data}",
+        "rules": [
+          {
+            "type": "required",
+            "field": "id",
+            "message": "Record ID is required"
+          },
+          {
+            "type": "type",
+            "field": "timestamp",
+            "config": {"type": "str"},
+            "message": "Timestamp must be a string"
+          },
+          {
+            "type": "regex",
+            "field": "email",
+            "config": {"pattern": "^[\\w\\.-]+@[\\w\\.-]+\\.\\w+$"},
+            "message": "Invalid email format"
+          },
+          {
+            "type": "range",
+            "field": "age",
+            "config": {"min": 0, "max": 150},
+            "message": "Age must be between 0 and 150"
+          }
+        ]
+      },
+      "timeout_seconds": 300,
+      "outputs": ["valid_records", "invalid_records", "validation_summary"],
+      "depends_on": ["data_ingestion"],
+      "condition": {
+        "expression": "processing_options.validate_schema == True and record_count > 0",
+        "variables": {},
+        "required_outputs": ["record_count"]
+      }
+    },
+    {
+      "id": "duplicate_detection",
+      "name": "Duplicate Record Detection",
+      "type": "data_transform",
+      "agent_id": "task-executor-1",
+      "capability": "task-data-transform",
+      "parameters": {
+        "input_data": "{valid_records}",
+        "transformations": [
+          {
+            "type": "group",
+            "config": {"group_by": "id"}
+          },
+          {
+            "type": "filter",
+            "config": {"condition": "len(item) == 1"}
+          },
+          {
+            "type": "map",
+            "config": {"expression": "item[0]"}
+          }
+        ],
+        "output_format": "json"
+      },
+      "timeout_seconds": 600,
+      "outputs": ["unique_records", "duplicate_count"],
+      "depends_on": ["data_validation"],
+      "condition": {
+        "expression": "processing_options.remove_duplicates == True and len(valid_records) > 0",
+        "variables": {},
+        "required_outputs": ["valid_records"]
+      }
+    },
+    {
+      "id": "data_enrichment",
+      "name": "Data Enrichment",
+      "type": "parallel",
+      "agent_id": "task-executor-1",
+      "capability": "task-execute",
+      "parameters": {
+        "task_type": "api_call",
+        "task_config": {
+          "parallel_requests": [
+            {
+              "name": "geolocation_enrichment",
+              "method": "POST",
+              "url": "https://api.geocoding.com/batch",
+              "data": "{address_fields}",
+              "headers": {"Authorization": "Bearer {geo_api_key}"}
+            },
+            {
+              "name": "demographic_enrichment",
+              "method": "POST",
+              "url": "https://api.demographics.com/enrich",
+              "data": "{demographic_fields}",
+              "headers": {"Authorization": "Bearer {demo_api_key}"}
+            }
+          ]
+        }
+      },
+      "timeout_seconds": 900,
+      "outputs": ["enriched_data", "enrichment_status"],
+      "depends_on": ["duplicate_detection"]
+    },
+    {
+      "id": "data_transformation",
+      "name": "Data Transformation",
+      "type": "data_transform",
+      "agent_id": "task-executor-1",
+      "capability": "task-data-transform",
+      "parameters": {
+        "input_data": "{enriched_data}",
+        "transformations": [
+          {
+            "type": "map",
+            "config": {
+              "expression": "{'customer_id': item['id'], 'full_name': f\"{item['first_name']} {item['last_name']}\", 'age_group': 'adult' if item['age'] >= 18 else 'minor', 'location': item.get('enriched_location', 'unknown'), 'processed_at': datetime.now().isoformat()}"
+            }
+          },
+          {
+            "type": "filter",
+            "config": {"condition": "item['age_group'] == 'adult'"}
+          },
+          {
+            "type": "sort",
+            "config": {"key": "customer_id"}
+          }
+        ],
+        "output_format": "json"
+      },
+      "timeout_seconds": 600,
+      "outputs": ["transformed_data", "transformation_summary"],
+      "depends_on": ["data_enrichment"],
+      "condition": {
+        "expression": "processing_options.apply_transformations == True",
+        "variables": {},
+        "required_outputs": []
+      }
+    },
+    {
+      "id": "quality_assessment",
+      "name": "Data Quality Assessment",
+      "type": "data_transform",
+      "agent_id": "task-executor-1",
+      "capability": "task-data-transform",
+      "parameters": {
+        "input_data": "{transformed_data}",
+        "transformations": [
+          {
+            "type": "aggregate",
+            "config": {
+              "operations": [
+                {"type": "count", "field": "customer_id", "result_key": "total_records"},
+                {"type": "count", "field": "full_name", "result_key": "records_with_name"},
+                {"type": "count", "field": "location", "result_key": "records_with_location"}
+              ]
+            }
+          }
+        ]
+      },
+      "timeout_seconds": 300,
+      "outputs": ["quality_metrics", "completeness_score"],
+      "depends_on": ["data_transformation"]
+    },
+    {
+      "id": "data_output",
+      "name": "Data Output to Targets",
+      "type": "parallel",
+      "agent_id": "task-executor-1",
+      "capability": "task-execute",
+      "parameters": {
+        "task_type": "file_operation",
+        "task_config": {
+          "operations": [
+            {
+              "operation": "write",
+              "file_path": "/data/processed/customers_{timestamp}.json",
+              "content": "{transformed_data}",
+              "format": "json"
+            },
+            {
+              "operation": "write",
+              "file_path": "/data/processed/quality_report_{timestamp}.json",
+              "content": "{quality_metrics}",
+              "format": "json"
+            }
+          ]
+        }
+      },
+      "timeout_seconds": 600,
+      "outputs": ["output_files", "export_status"],
+      "depends_on": ["quality_assessment"]
+    },
+    {
+      "id": "database_update",
+      "name": "Update Database",
+      "type": "api_call",
+      "agent_id": "task-executor-1",
+      "capability": "task-api-call",
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.datawarehouse.com/bulk-insert",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer {db_api_key}"
+        },
+        "data": {
+          "table": "customers",
+          "records": "{transformed_data}",
+          "upsert": true,
+          "batch_size": 1000
+        },
+        "timeout": 1800
+      },
+      "timeout_seconds": 2400,
+      "outputs": ["insert_status", "inserted_count", "updated_count"],
+      "depends_on": ["data_output"]
+    },
+    {
+      "id": "analytics_trigger",
+      "name": "Trigger Analytics Jobs",
+      "type": "api_call",
+      "agent_id": "task-executor-1",
+      "capability": "task-api-call",
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.analytics.com/jobs/trigger",
+        "headers": {
+          "Authorization": "Bearer {analytics_api_key}"
+        },
+        "data": {
+          "job_type": "customer_analysis",
+          "input_table": "customers",
+          "trigger_reason": "new_data_processed",
+          "priority": "normal"
+        }
+      },
+      "timeout_seconds": 120,
+      "outputs": ["job_id", "estimated_completion"],
+      "depends_on": ["database_update"],
+      "condition": {
+        "expression": "inserted_count > 0 or updated_count > 0",
+        "variables": {},
+        "required_outputs": ["inserted_count", "updated_count"]
+      }
+    },
+    {
+      "id": "notification_summary",
+      "name": "Send Processing Summary",
+      "type": "api_call",
+      "agent_id": "task-executor-1",
+      "capability": "task-api-call",
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notifications.com/send",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer {notification_api_key}"
+        },
+        "data": {
+          "channel": "email",
+          "recipients": ["data-team@company.com"],
+          "subject": "Data Pipeline Completed - {workflow_instance_id}",
+          "template": "pipeline_summary",
+          "data": {
+            "records_processed": "{record_count}",
+            "records_valid": "{len(valid_records)}",
+            "records_invalid": "{len(invalid_records)}",
+            "duplicates_removed": "{duplicate_count}",
+            "final_records": "{len(transformed_data)}",
+            "quality_score": "{completeness_score}",
+            "output_files": "{output_files}",
+            "processing_time": "{execution_time}"
+          }
+        }
+      },
+      "timeout_seconds": 120,
+      "outputs": ["notification_sent", "notification_id"],
+      "depends_on": ["analytics_trigger"]
+    },
+    {
+      "id": "cleanup",
+      "name": "Cleanup Temporary Data",
+      "type": "file_operation",
+      "agent_id": "task-executor-1",
+      "capability": "task-file-operation",
+      "parameters": {
+        "operation": "delete",
+        "file_path": "/tmp/processing_{workflow_instance_id}/*"
+      },
+      "timeout_seconds": 60,
+      "outputs": ["cleanup_status"],
+      "depends_on": ["notification_summary"]
+    }
+  ],
+  "metadata": {
+    "created_by": "data-engineering-team",
+    "created_at": "2024-01-15T09:00:00Z",
+    "last_modified": "2024-01-20T14:30:00Z",
+    "version_notes": "Added parallel enrichment and improved error handling",
+    "environment": "production",
+    "sla_hours": 2,
+    "data_classification": "internal",
+    "monitoring_required": true
+  }
+}

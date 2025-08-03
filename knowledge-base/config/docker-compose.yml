@@ -1,0 +1,293 @@
+version: '3.8'
+
+services:
+  # AMP Router (from shared infrastructure)
+  amp-router:
+    image: amp-router:latest
+    container_name: kb-amp-router
+    ports:
+      - "8000:8000"
+    environment:
+      - AMP_HOST=0.0.0.0
+      - AMP_PORT=8000
+      - AMP_LOG_LEVEL=INFO
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - knowledge-base-network
+    restart: unless-stopped
+
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: kb-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - knowledge-base-network
+    restart: unless-stopped
+
+  # Neo4j for knowledge graph (optional)
+  neo4j:
+    image: neo4j:5.8
+    container_name: kb-neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      - NEO4J_AUTH=neo4j/knowledge_graph_2024
+      - NEO4J_PLUGINS=["apoc"]
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*
+    volumes:
+      - neo4j-data:/data
+      - neo4j-logs:/logs
+    networks:
+      - knowledge-base-network
+    restart: unless-stopped
+
+  # Knowledge Ingestion Agent
+  knowledge-ingestion:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.agent
+      args:
+        AGENT_NAME: knowledge_ingestion
+    container_name: kb-ingestion-agent
+    environment:
+      - AGENT_ID=knowledge-ingestion-agent
+      - AMP_HOST=amp-router
+      - AMP_PORT=8000
+      - CONFIG_PATH=/app/config/agent_config.yaml
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./logs:/app/logs
+      - ./temp:/app/temp
+    depends_on:
+      - amp-router
+    networks:
+      - knowledge-base-network
+    restart: unless-stopped
+
+  # Semantic Search Agent
+  semantic-search:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.agent
+      args:
+        AGENT_NAME: semantic_search
+    container_name: kb-search-agent
+    environment:
+      - AGENT_ID=semantic-search-agent
+      - AMP_HOST=amp-router
+      - AMP_PORT=8000
+      - CONFIG_PATH=/app/config/agent_config.yaml
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./logs:/app/logs
+    depends_on:
+      - amp-router
+    networks:
+      - knowledge-base-network
+    restart: unless-stopped
+
+  # Knowledge Graph Agent
+  knowledge-graph:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.agent
+      args:
+        AGENT_NAME: knowledge_graph
+    container_name: kb-graph-agent
+    environment:
+      - AGENT_ID=knowledge-graph-agent
+      - AMP_HOST=amp-router
+      - AMP_PORT=8000
+      - CONFIG_PATH=/app/config/agent_config.yaml
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=knowledge_graph_2024
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./logs:/app/logs
+    depends_on:
+      - amp-router
+      - neo4j
+    networks:
+      - knowledge-base-network
+    restart: unless-stopped
+
+  # Query Router Agent
+  query-router:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.agent
+      args:
+        AGENT_NAME: query_router
+    container_name: kb-router-agent
+    environment:
+      - AGENT_ID=query-router-agent
+      - AMP_HOST=amp-router
+      - AMP_PORT=8000
+      - CONFIG_PATH=/app/config/agent_config.yaml
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./logs:/app/logs
+    depends_on:
+      - amp-router
+    networks:
+      - knowledge-base-network
+    restart: unless-stopped
+
+  # Cache Manager Agent
+  cache-manager:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.agent
+      args:
+        AGENT_NAME: cache_manager
+    container_name: kb-cache-agent
+    environment:
+      - AGENT_ID=cache-manager-agent
+      - AMP_HOST=amp-router
+      - AMP_PORT=8000
+      - CONFIG_PATH=/app/config/agent_config.yaml
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./logs:/app/logs
+    depends_on:
+      - amp-router
+      - redis
+    networks:
+      - knowledge-base-network
+    restart: unless-stopped
+
+  # Knowledge Curator Agent
+  knowledge-curator:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.agent
+      args:
+        AGENT_NAME: knowledge_curator
+    container_name: kb-curator-agent
+    environment:
+      - AGENT_ID=knowledge-curator-agent
+      - AMP_HOST=amp-router
+      - AMP_PORT=8000
+      - CONFIG_PATH=/app/config/agent_config.yaml
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./logs:/app/logs
+    depends_on:
+      - amp-router
+    networks:
+      - knowledge-base-network
+    restart: unless-stopped
+
+  # Web Interface
+  web-interface:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+    container_name: kb-web-interface
+    ports:
+      - "8080:8080"
+    environment:
+      - AMP_HOST=amp-router
+      - AMP_PORT=8000
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./web:/app/web
+    depends_on:
+      - amp-router
+      - query-router
+    networks:
+      - knowledge-base-network
+    restart: unless-stopped
+
+  # Admin Interface
+  admin-interface:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.admin
+    container_name: kb-admin-interface
+    ports:
+      - "8081:8081"
+    environment:
+      - AMP_HOST=amp-router
+      - AMP_PORT=8000
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=knowledge_admin_2024
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./admin:/app/admin
+      - ./logs:/app/logs
+    depends_on:
+      - amp-router
+    networks:
+      - knowledge-base-network
+    restart: unless-stopped
+
+  # Monitoring (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: kb-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+    networks:
+      - knowledge-base-network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: kb-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=knowledge_grafana_2024
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./config/grafana:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+    networks:
+      - knowledge-base-network
+    restart: unless-stopped
+
+networks:
+  knowledge-base-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  redis-data:
+    driver: local
+  neo4j-data:
+    driver: local
+  neo4j-logs:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local

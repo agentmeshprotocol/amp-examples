@@ -1,0 +1,184 @@
+name: Documentation Request
+description: Request new documentation or improvements to existing documentation
+title: "[DOCS] "
+labels: ["documentation", "examples", "needs-triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve our documentation! Clear documentation is essential for AMP adoption.
+        
+        Before submitting:
+        - Check our [examples documentation](https://docs.agentmeshprotocol.io/examples) for existing content
+        - Search existing issues to avoid duplicates
+        - Consider if this is a quick fix you could contribute via PR
+
+  - type: dropdown
+    id: doc-type
+    attributes:
+      label: Documentation Type
+      description: What type of documentation is needed?
+      options:
+        - New documentation
+        - Update existing documentation
+        - Fix error or typo
+        - Improve clarity/examples
+        - Add missing information
+        - Reorganize content
+        - Translation
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Documentation Category
+      description: Which area of documentation does this relate to?
+      options:
+        - Protocol Specification
+        - Getting Started Guide
+        - API Reference
+        - Framework Integration
+        - Examples and Tutorials
+        - Best Practices
+        - Troubleshooting
+        - FAQ
+        - Architecture Guide
+        - SDK Documentation
+        - Security Guide
+        - Performance Guide
+        - Contributing Guidelines
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: location
+    attributes:
+      label: Documentation Location
+      description: URL or file path of the documentation (if updating existing)
+      placeholder: "https://docs.agentmeshprotocol.io/getting-started or docs/protocol.md"
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe what documentation is needed or what should be improved
+      placeholder: |
+        - What information is missing or unclear?
+        - What specific sections need attention?
+        - What would help users understand better?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: audience
+    attributes:
+      label: Target Audience
+      description: Who is the primary audience for this documentation?
+      options:
+        - Beginners (new to AMP)
+        - Developers (implementing with AMP)
+        - Framework Maintainers (integrating frameworks)
+        - Protocol Contributors (contributing to AMP)
+        - System Architects (designing with AMP)
+        - All users
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this documentation?
+      options:
+        - Low (minor improvement)
+        - Medium (would help users)
+        - High (important for adoption)
+        - Critical (blocks user understanding)
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case
+      description: Describe the scenario where this documentation would be helpful
+      placeholder: |
+        When would someone need this documentation?
+        What task are they trying to accomplish?
+        What challenges do they face without this documentation?
+
+  - type: textarea
+    id: current-problem
+    attributes:
+      label: Current Problem
+      description: What's wrong with the current documentation (if updating existing)?
+      placeholder: |
+        - Information is missing
+        - Examples don't work
+        - Instructions are unclear
+        - Content is outdated
+        - Organization is confusing
+
+  - type: textarea
+    id: proposed-content
+    attributes:
+      label: Proposed Content
+      description: Draft the content you'd like to see (optional but helpful)
+      placeholder: |
+        Provide an outline, draft content, or examples of what should be included.
+        Even rough notes are helpful!
+
+  - type: textarea
+    id: examples-needed
+    attributes:
+      label: Examples Needed
+      description: What examples or code samples would be helpful?
+      placeholder: |
+        - Code examples for specific use cases
+        - Configuration examples
+        - Step-by-step tutorials
+        - Real-world scenarios
+
+  - type: input
+    id: related-issues
+    attributes:
+      label: Related Issues
+      description: Link any related issues or discussions
+      placeholder: "#123, #456"
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other relevant information
+      placeholder: |
+        - Screenshots of confusing sections
+        - Links to helpful external resources
+        - User feedback or questions
+        - Technical constraints
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I would be willing to write this documentation
+        - label: I would be willing to review draft documentation
+        - label: I can provide examples or use cases
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have searched existing documentation
+          required: true
+        - label: I have searched existing issues for duplicates
+          required: true
+        - label: I have clearly described what documentation is needed
+          required: true
+        - label: I have identified the target audience
+          required: true

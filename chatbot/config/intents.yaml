@@ -1,0 +1,215 @@
+# Intent detection patterns for conversation routing
+
+intents:
+  faq:
+    description: "General questions about company, policies, and information"
+    patterns:
+      - "what are your hours"
+      - "business hours"
+      - "when are you open"
+      - "how to contact"
+      - "contact information"
+      - "company information"
+      - "about your company"
+      - "general question"
+      - "where are you located"
+      - "your address"
+      - "return policy"
+      - "refund policy"
+      - "shipping policy"
+      - "privacy policy"
+      - "terms of service"
+      - "company policy"
+    examples:
+      - "When are you open?"
+      - "What's your address?"
+      - "How can I contact you?"
+      - "What's your return policy?"
+      - "Do you ship internationally?"
+      - "What are your business hours?"
+    keywords:
+      - "hours"
+      - "contact"
+      - "address"
+      - "location"
+      - "policy"
+      - "information"
+      - "about"
+      - "company"
+      - "general"
+    
+  sales:
+    description: "Sales inquiries, pricing, and product information"
+    patterns:
+      - "pricing"
+      - "how much"
+      - "cost"
+      - "price"
+      - "buy"
+      - "purchase"
+      - "demo"
+      - "trial"
+      - "free trial"
+      - "show me"
+      - "product"
+      - "features"
+      - "plans"
+      - "subscription"
+      - "upgrade"
+      - "discount"
+      - "offer"
+      - "quote"
+    examples:
+      - "How much does it cost?"
+      - "I want to buy your product"
+      - "Can I get a demo?"
+      - "What are your pricing plans?"
+      - "Do you offer discounts?"
+      - "I'm interested in your product"
+    keywords:
+      - "price"
+      - "cost"
+      - "buy"
+      - "purchase"
+      - "demo"
+      - "trial"
+      - "product"
+      - "features"
+      - "plans"
+      - "subscription"
+      - "upgrade"
+      - "discount"
+      - "quote"
+    
+  technical:
+    description: "Technical issues, bugs, and troubleshooting"
+    patterns:
+      - "not working"
+      - "error"
+      - "bug"
+      - "issue"
+      - "problem"
+      - "technical issue"
+      - "broken"
+      - "crash"
+      - "freeze"
+      - "slow"
+      - "timeout"
+      - "can't login"
+      - "won't load"
+      - "help with"
+      - "troubleshoot"
+      - "fix"
+      - "repair"
+    examples:
+      - "The app crashes when I try to login"
+      - "I'm getting an error message"
+      - "The system is very slow"
+      - "I can't access my account"
+      - "There's a bug in the software"
+      - "Help me fix this issue"
+    keywords:
+      - "error"
+      - "bug"
+      - "broken"
+      - "crash"
+      - "issue"
+      - "problem"
+      - "technical"
+      - "not working"
+      - "slow"
+      - "timeout"
+      - "login"
+      - "access"
+      - "troubleshoot"
+      - "fix"
+    
+  general:
+    description: "Greetings, general help, and conversational"
+    patterns:
+      - "hello"
+      - "hi"
+      - "hey"
+      - "good morning"
+      - "good afternoon"
+      - "good evening"
+      - "help"
+      - "assist"
+      - "support"
+      - "thanks"
+      - "thank you"
+      - "goodbye"
+      - "bye"
+      - "can you help"
+      - "need help"
+      - "general inquiry"
+    examples:
+      - "Hi there"
+      - "Hello, can you help me?"
+      - "Good morning"
+      - "I need some assistance"
+      - "Thank you for your help"
+      - "Can you help me with something?"
+    keywords:
+      - "hello"
+      - "hi"
+      - "help"
+      - "assist"
+      - "support"
+      - "thanks"
+      - "thank you"
+      - "general"
+      - "inquiry"
+
+# Intent confidence thresholds
+confidence_thresholds:
+  high: 0.8
+  medium: 0.6
+  low: 0.4
+
+# Routing rules
+routing_rules:
+  default_agent: "faq-agent"
+  escalation_agent: "tech-support-agent"
+  
+  # Multi-intent handling
+  multi_intent_strategy: "highest_confidence"  # or "sequential", "parallel"
+  
+  # Context-aware routing
+  context_routing:
+    enable: true
+    conversation_history_weight: 0.3
+    previous_agent_continuity: 0.2
+    
+  # Agent selection criteria
+  agent_selection:
+    faq-agent:
+      max_concurrent: 50
+      specialization_score: 0.9
+      
+    sales-agent:
+      max_concurrent: 20
+      specialization_score: 0.95
+      
+    tech-support-agent:
+      max_concurrent: 15
+      specialization_score: 0.98
+
+# Fallback strategies
+fallback:
+  unknown_intent:
+    strategy: "route_to_faq"
+    message: "I'm not sure I understand. Let me connect you with someone who can help."
+    
+  low_confidence:
+    threshold: 0.4
+    strategy: "clarify_intent"
+    message: "Could you please provide more details about what you need help with?"
+    
+  agent_unavailable:
+    strategy: "queue_or_transfer"
+    message: "The specialist is currently busy. I'll queue your request or find another agent to help."
+    
+  multiple_intents:
+    strategy: "ask_priority"
+    message: "I see you have multiple questions. Which would you like me to help with first?"
